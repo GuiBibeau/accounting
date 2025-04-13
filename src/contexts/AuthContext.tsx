@@ -117,8 +117,9 @@ export const useLogin = () => {
 };
 
 export const useSignup = () => {
-    const { signupWithEmail, error, clearError } = useAuth();
-    return { signupWithEmail, signupError: error, clearSignupError: clearError };
+    const { signupWithEmail, loginWithGoogle, error, clearError } = useAuth();
+    // Rename loginWithGoogle to signupWithGoogle for semantic clarity in this hook
+    return { signupWithEmail, signupWithGoogle: loginWithGoogle, signupError: error, clearSignupError: clearError };
 };
 
 export const useLogout = () => {

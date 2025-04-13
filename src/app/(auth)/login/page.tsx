@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Text, TextLink } from "@/components/ui/text";
 import { Divider } from "@/components/ui/divider"; // Import Divider
+import { FcGoogle } from 'react-icons/fc'; // Import Google icon from react-icons
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -89,8 +90,8 @@ export default function LoginPage() {
             </FieldGroup>
           </form>
           <Divider className="my-6" /> {/* Add a divider */}
-          <Button outline onClick={handleGoogleLogin} className="w-full">
-            {/* TODO: Add Google Icon if available */}
+          <Button outline onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2">
+            <FcGoogle className="h-5 w-5" /> {/* Use FcGoogle icon */}
             Sign In with Google
           </Button>
         </Fieldset>
