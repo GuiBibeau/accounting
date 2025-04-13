@@ -8,13 +8,16 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
+import { useRouter, usePathname } from 'next/navigation';
 import { User, onAuthStateChanged, UserCredential } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { authService, AuthError } from "@/lib/auth.service";
+import { hasCompanyAssociation } from "@/lib/user";
 
 interface AuthContextProps {
   user: User | null;
   loading: boolean;
+  needsOnboarding: boolean | null;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   signupWithEmail: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -32,16 +35,61 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
   const [error, setError] = useState<AuthError | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      let onboardingStatus: boolean | null = null;
+      let authLoading = true;
+
       setUser(currentUser);
-      setLoading(false);
+      if (currentUser) {
+        try {
+          const hasAssociation = await hasCompanyAssociation(currentUser.uid);
+          onboardingStatus = !hasAssociation;
+          setNeedsOnboarding(onboardingStatus);
+        } catch (e) {
+          console.error("Failed to check company association:", e);
+          onboardingStatus = false;
+          setNeedsOnboarding(onboardingStatus);
+          setError({ code: 'check-failed', message: 'Could not verify company status.' });
+        }
+      } else {
+        onboardingStatus = null;
+        setNeedsOnboarding(onboardingStatus);
+      }
+
+      authLoading = false;
+      setLoading(authLoading);
+
+      const isAuthPage = pathname === '/login' || pathname === '/signup';
+      const isOnboardingPage = pathname === '/onboarding';
+
+      if (!authLoading) {
+        if (!currentUser && !isAuthPage) {
+          console.log("AuthProvider: No user, redirecting to login.");
+          router.push('/login');
+        } else if (currentUser) {
+          if (onboardingStatus === true && !isOnboardingPage) {
+            console.log("AuthProvider: Needs onboarding, redirecting to /onboarding.");
+            router.push('/onboarding');
+          } else if (onboardingStatus === false && isOnboardingPage) {
+            console.log("AuthProvider: Onboarding complete/not needed, redirecting from onboarding to /dashboard.");
+            router.push('/dashboard');
+          } else if (isAuthPage) {
+            const destination = onboardingStatus === true ? '/onboarding' : '/dashboard';
+            console.log(`AuthProvider: User logged in on auth page, redirecting to ${destination}.`);
+            router.push(destination);
+          }
+        }
+      }
+
     });
-    // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [pathname, router]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -54,8 +102,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await operation();
       } catch (err) {
         setError(err as AuthError);
-        // Re-throw the error if needed by the caller, though often UI just needs the state
-        // throw err; 
       }
     },
     [clearError]
@@ -86,6 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value = {
     user,
     loading,
+    needsOnboarding,
     loginWithEmail,
     signupWithEmail,
     loginWithGoogle,
@@ -105,10 +152,9 @@ export const useAuth = (): AuthContextProps => {
   return context;
 };
 
-// Specific hooks for convenience
 export const useUser = () => {
-  const { user, loading } = useAuth();
-  return { user, loading };
+  const { user, loading, needsOnboarding } = useAuth();
+  return { user, loading, needsOnboarding };
 };
 
 export const useLogin = () => {
@@ -118,7 +164,6 @@ export const useLogin = () => {
 
 export const useSignup = () => {
     const { signupWithEmail, loginWithGoogle, error, clearError } = useAuth();
-    // Rename loginWithGoogle to signupWithGoogle for semantic clarity in this hook
     return { signupWithEmail, signupWithGoogle: loginWithGoogle, signupError: error, clearSignupError: clearError };
 };
 

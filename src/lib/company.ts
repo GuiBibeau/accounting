@@ -77,6 +77,66 @@ export const createCompany = async (
   }
 };
 
+
+/**
+ * Handles the complete onboarding process for a new user and their company.
+ * Creates the company, adds the user as the first member (with their specified role),
+ * and updates the user's profile with the company ID and full name in a single batch.
+ *
+ * @param user - The Firebase Auth User object of the user being onboarded.
+ * @param data - The onboarding data collected from the form.
+ * @throws Throws an error if the batch write fails.
+ */
+export const handleOnboarding = async (
+  user: FirebaseUser,
+  data: OnboardingData
+): Promise<void> => {
+  if (!user.uid || !user.email) {
+    throw new Error('User UID and email are required for onboarding.');
+  }
+  if (!data.companyName || !data.companySize || !data.companyField || !data.role || !data.fullName) {
+    throw new Error('All onboarding fields are required.');
+  }
+
+  const batch = writeBatch(db);
+  const now = serverTimestamp();
+
+  const companyCollectionRef = collection(db, 'companies');
+  const newCompanyRef = doc(companyCollectionRef);
+  const companyId = newCompanyRef.id;
+
+  const newCompanyData: Company = {
+    companyId: companyId,
+    name: data.companyName,
+    size: data.companySize,
+    field: data.companyField,
+    createdAt: now as Timestamp,
+    createdBy: user.uid,
+  };
+  batch.set(newCompanyRef, newCompanyData);
+
+  const memberRef = doc(db, 'companies', companyId, 'members', user.uid);
+  const newMemberData: CompanyMember = {
+    userId: user.uid,
+    role: data.role,
+    joinedAt: now as Timestamp,
+  };
+  batch.set(memberRef, newMemberData);
+
+  addUserProfileUpdateToBatch(batch, user, {
+    currentCompanyId: companyId,
+    fullName: data.fullName,
+  });
+
+  try {
+    await batch.commit();
+    console.log(`Onboarding successful for user ${user.uid}, company ${companyId} created.`);
+  } catch (error) {
+    console.error('Onboarding process failed:', error);
+    throw new Error(`Failed during onboarding batch commit: ${error instanceof Error ? error.message : String(error)}`);
+  }
+};
+
 export interface AddMemberData {
   role: CompanyRole;
 }
