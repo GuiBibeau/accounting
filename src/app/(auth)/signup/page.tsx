@@ -3,6 +3,12 @@
 import React, { useState } from "react";
 import { useSignup, useUser } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { AuthLayout } from "@/components/ui/auth-layout";
+import { Heading } from "@/components/ui/heading";
+import { Fieldset, FieldGroup, Field, Label, ErrorMessage } from "@/components/ui/fieldset";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Text, TextLink } from "@/components/ui/text";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -15,7 +21,7 @@ export default function SignupPage() {
     e.preventDefault();
     clearSignupError();
     await signupWithEmail(email, password);
-    // Redirect on successful signup
+    // Check for error *after* the attempt.
     if (!signupError) {
       router.push("/"); // Redirect to home page after signup
     }
@@ -30,37 +36,54 @@ export default function SignupPage() {
 
   // Don't render the form if loading or already logged in
   if (loading || user) {
-    return <div>Loading...</div>; // Or a redirect component
+    // TODO: Replace with a proper loading spinner component if available
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
   return (
-    <div>
-      <h1>Sign Up</h1>
-      <form onSubmit={handleEmailSignup}>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6} // Basic Firebase password requirement
-          />
-        </div>
-        <button type="submit">Sign Up with Email</button>
-      </form>
-      {signupError && <p style={{ color: "red" }}>Error: {signupError.message}</p>}
-    </div>
+    <AuthLayout>
+      <div className="flex flex-col items-center gap-6 w-full max-w-sm">
+        <Heading>Sign Up</Heading>
+        <Fieldset className="w-full">
+          <form onSubmit={handleEmailSignup}>
+            <FieldGroup>
+              <Field>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </Field>
+              <Field>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6} // Basic Firebase password requirement
+                  autoComplete="new-password" // Use new-password for signup
+                />
+              </Field>
+              {signupError && <ErrorMessage>{signupError.message}</ErrorMessage>}
+              <Button type="submit" color="indigo" className="w-full">
+                Sign Up with Email
+              </Button>
+            </FieldGroup>
+          </form>
+        </Fieldset>
+
+        <Text>
+          Already have an account? <TextLink href="/login">Log in</TextLink>
+        </Text>
+      </div>
+    </AuthLayout>
   );
 }
