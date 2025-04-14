@@ -4,14 +4,25 @@ import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { getMessages, Message } from '@/lib/messages';
-
-
+import { getMessages, saveMessage, Message } from '@/lib/messages';
+import { useChat } from '@ai-sdk/react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [, setIsLoading] = useState(true);
   const { id: conversationId } = useParams();
+
+  const { append, status } = useChat({
+    api: '/api/chat',
+    onFinish: async (message) => {
+      if (conversationId) {
+        await saveMessage(conversationId as string, {
+          role: 'assistant',
+          content: message.content,
+        });
+      }
+    }
+  });
 
   useEffect(() => {
     if (!conversationId) return;
@@ -22,15 +33,16 @@ export default function ChatPage() {
       (fetchedMessages) => {
         setMessages(fetchedMessages);
         setIsLoading(false);
+
       }
     );
 
     return () => unsubscribe();
-  }, [conversationId]);
+  }, [conversationId, append]);
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 relative">
         {messages.map((message, index) => (
           <motion.div
             key={index}
@@ -129,7 +141,7 @@ export default function ChatPage() {
             <textarea
               className="w-full bg-transparent px-4 py-3 outline-none resize-none h-12"
               placeholder="Ask anything, create anything"
-            ></textarea>
+            />
             <div className="absolute right-2 bottom-2 flex items-center">
               <motion.button
                 className="p-2 text-gray-400"

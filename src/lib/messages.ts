@@ -6,6 +6,7 @@ import {
   onSnapshot,
   Unsubscribe,
   Timestamp,
+  addDoc,
 } from 'firebase/firestore';
 
 export interface Message {
@@ -21,6 +22,27 @@ export interface Message {
  * @param callback Function to call with the messages array when data changes
  * @returns Unsubscribe function to stop listening
  */
+/**
+ * Saves a new message to Firestore
+ * @param conversationId The ID of the conversation
+ * @param message The message to save
+ * @returns Promise that resolves when message is saved
+ */
+export const saveMessage = async (
+  conversationId: string,
+  message: Omit<Message, 'id' | 'createdAt'>
+): Promise<void> => {
+  if (!conversationId) {
+    throw new Error('saveMessage: conversationId is required');
+  }
+
+  const messagesCol = collection(db, 'conversations', conversationId, 'messages');
+  await addDoc(messagesCol, {
+    ...message,
+    createdAt: Timestamp.now(),
+  });
+};
+
 export const getMessages = (
   conversationId: string,
   callback: (messages: Message[]) => void

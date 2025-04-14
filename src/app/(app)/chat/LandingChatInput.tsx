@@ -1,16 +1,32 @@
+import { DocumentData, } from 'firebase/firestore';
+import { DocumentReference } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { createConversation } from '@/lib/conversations';
+import { useRouter } from 'next/navigation';
 
-export const LandingChatInput = () => {
+type Props = {
+  newConversationRef: DocumentReference<DocumentData> | null;
+}
+
+export const LandingChatInput: React.FC<Props> = ({ newConversationRef }) => {
   const textareaRef = useRef(null);
   const [inputValue, setInputValue] = useState('');
+  const router = useRouter();
+  
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
         e.preventDefault();
-        setInputValue('');
-      }
+        const conversationRef = await createConversation({
+          conversationRef: newConversationRef!,
+          userId: '123',
+          message: inputValue,
+        });
+
+        router.push(`/chat/${conversationRef.id}`);
+    }
     };
 
   return (

@@ -10,7 +10,13 @@ import {
   getDoc,
   Timestamp,
   Unsubscribe,
+  DocumentData,
+  writeBatch,
+  serverTimestamp,
+  DocumentReference,
 } from 'firebase/firestore';
+import { groq, groqSummarizationModelId } from './groq';
+import { generateText } from 'ai';
 
 export interface Conversation {
   id: string;
@@ -21,6 +27,55 @@ export interface Conversation {
   date?: string;
   active?: boolean;
 }
+
+/**
+ * Creates a new conversation with a generated title based on the first message.
+ * 
+ * @param conversationRef - The reference to the conversation document.
+ * @param userId - The ID of the user creating the conversation.
+ * @param message - The first message in the conversation.
+ * 
+ * @returns A promise that resolves to the created conversation.
+ */
+export const createConversation = async ({
+  conversationRef,
+  userId,
+  message,
+}: {
+  conversationRef: DocumentReference<DocumentData>;
+  userId: string;
+  message: string;
+}) => {
+
+  const batch = writeBatch(db);
+
+  const { text: title } = await generateText({
+    model: groq(groqSummarizationModelId),
+    prompt: `Write a summary of this chat message under 7 words. Return only the summary ${message}`,
+  });
+
+  const conversationData = {
+    userId,
+    title,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }
+
+  batch.set(conversationRef, conversationData);
+  const messagesColRef = collection(conversationRef, 'messages');
+  const firstMessageRef = doc(messagesColRef);
+
+  const messageData = {
+    role: 'user',
+    content: message,
+    createdAt: serverTimestamp(),
+  };
+
+  batch.set(firstMessageRef, messageData);
+
+  await batch.commit()
+  return conversationRef;
+};
 
 /**
  * Fetches the latest 15 conversations for a given user in real-time.
@@ -90,7 +145,7 @@ export const getConversation = async (
   try {
     const docRef = doc(db, 'conversations', conversationId);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       const data = docSnap.data();
       return {
@@ -98,7 +153,7 @@ export const getConversation = async (
         userId: data.userId,
         title: data.title ?? 'Untitled Conversation',
         createdAt: data.createdAt,
-        updatedAt: data.updatedAt
+        updatedAt: data.updatedAt,
       } as Conversation;
     }
     return null;

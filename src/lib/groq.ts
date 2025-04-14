@@ -7,18 +7,8 @@ import { createGroq } from '@ai-sdk/groq';
  */
 export const groq = (() => {
   const groqApiKey = process.env.GROQ_API_KEY;
-  if (!groqApiKey) {
-    console.warn(
-      'GROQ_API_KEY environment variable is not set. AI features requiring Groq will be disabled.'
-    );
-    return null;
-  }
-  try {
-    return createGroq({ apiKey: groqApiKey });
-  } catch (error) {
-    console.error('Failed to initialize Groq client:', error);
-    return null;
-  }
+
+  return createGroq({ apiKey: groqApiKey });
 })();
 
 /** The specific Groq model ID to use for summarization tasks. */
