@@ -215,7 +215,7 @@ export const SideNav = () => {
                     onClick={viewAllConversations}
                     className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-gray-400 rounded-md"
                   >
-                    <span className="ml-6">View all conversations...</span>
+                    <span>View all conversations...</span>
                   </motion.button>
                 )}
               </div>
