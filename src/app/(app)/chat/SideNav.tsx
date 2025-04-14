@@ -8,14 +8,13 @@ import {
   ChevronRight,
   HomeIcon,
   History,
-  MessageSquare,
-  User, // Added User icon
+  User,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getConversations, Conversation } from '@/lib/conversations';
-import { useAuth, useLogout } from '@/contexts/AuthContext'; // Added useLogout
+import { useAuth, useLogout } from '@/contexts/AuthContext'; 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button'; // Added Button
+import { Button } from '@/components/ui/button'; 
 import {
   Dialog,
   DialogContent,
@@ -23,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'; // Added Dialog components
+} from '@/components/ui/dialog'; 
 const sidebarVariants = {
   expanded: {
     width: '200px',
@@ -78,7 +77,7 @@ export const SideNav = () => {
     Conversation[]
   >([]);
   const { user } = useAuth();
-  const { logout } = useLogout(); // Get logout function
+  const { logout } = useLogout();
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -166,7 +165,6 @@ export const SideNav = () => {
       <div className="flex-1 py-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           {sidebarExpanded ? (
-            // Expanded view - Only show recent conversations, no chat history option
             <motion.div
               key="expanded-nav"
               initial="hidden"
@@ -200,13 +198,9 @@ export const SideNav = () => {
                         : ''
                     }`}
                   >
-                    <Link href={`/chat/${conversation.id}`}>
-                      <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                      <div className="ml-2 overflow-hidden">
+                    <Link href={`/chat/${conversation.id}`} className="block w-full">
+                      <div className="overflow-hidden">
                         <div className="truncate">{conversation.title}</div>
-                        <div className="text-xs text-gray-400">
-                          {conversation.date}
-                        </div>
                       </div>
                     </Link>
                   </motion.button>
