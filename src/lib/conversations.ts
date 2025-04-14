@@ -10,13 +10,9 @@ import {
   getDoc,
   Timestamp,
   Unsubscribe,
-  DocumentData,
   writeBatch,
   serverTimestamp,
-  DocumentReference,
 } from 'firebase/firestore';
-import { groq, groqSummarizationModelId } from './groq';
-import { generateText } from 'ai';
 
 export interface Conversation {
   id: string;
@@ -31,28 +27,38 @@ export interface Conversation {
 /**
  * Creates a new conversation with a generated title based on the first message.
  * 
- * @param conversationRef - The reference to the conversation document.
  * @param userId - The ID of the user creating the conversation.
  * @param message - The first message in the conversation.
  * 
- * @returns A promise that resolves to the created conversation.
+ * @returns A promise that resolves to the ID of the created conversation.
  */
 export const createConversation = async ({
-  conversationRef,
   userId,
   message,
 }: {
-  conversationRef: DocumentReference<DocumentData>;
   userId: string;
   message: string;
 }) => {
+  const conversationsCol = collection(db, 'conversations');
+  const conversationRef = doc(conversationsCol); 
 
   const batch = writeBatch(db);
 
-  const { text: title } = await generateText({
-    model: groq(groqSummarizationModelId),
-    prompt: `Write a summary of this chat message under 7 words. Return only the summary ${message}`,
+  const response = await fetch('/api/summarize', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message }),
   });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('Error fetching summary:', errorData.error);
+    throw new Error(`Failed to generate conversation title: ${errorData.error || response.statusText}`);
+  }
+
+  const { title } = await response.json();
 
   const conversationData = {
     userId,
@@ -74,7 +80,7 @@ export const createConversation = async ({
   batch.set(firstMessageRef, messageData);
 
   await batch.commit()
-  return conversationRef;
+  return conversationRef.id; // Return the ID
 };
 
 /**

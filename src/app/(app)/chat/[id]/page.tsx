@@ -4,25 +4,14 @@ import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { getMessages, saveMessage, Message } from '@/lib/messages';
-import { useChat } from '@ai-sdk/react';
+import { getMessages, Message } from '@/lib/messages';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [, setIsLoading] = useState(true);
   const { id: conversationId } = useParams();
 
-  const { append, status } = useChat({
-    api: '/api/chat',
-    onFinish: async (message) => {
-      if (conversationId) {
-        await saveMessage(conversationId as string, {
-          role: 'assistant',
-          content: message.content,
-        });
-      }
-    }
-  });
+
 
   useEffect(() => {
     if (!conversationId) return;
@@ -38,7 +27,7 @@ export default function ChatPage() {
     );
 
     return () => unsubscribe();
-  }, [conversationId, append]);
+  }, [conversationId]);
 
   return (
     <>

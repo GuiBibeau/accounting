@@ -11,20 +11,8 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  serverTimestamp,
-  DocumentReference,
-  DocumentData,
-} from 'firebase/firestore';
 
 import { LandingChatInput } from './LandingChatInput';
-import { db } from '@/lib/firebase';
-
-
 
 const conversationHistory = [
   { id: 1, title: 'Monthly Expense Report', date: 'Apr 12' },
@@ -36,8 +24,6 @@ const conversationHistory = [
   { id: 7, title: 'Quarterly Financial Report', date: 'Apr 1' },
   { id: 8, title: 'testing this', date: 'Today', active: true },
 ];
-
-
 
 const listItemVariants = {
   hidden: { opacity: 0, y: 10 },
@@ -76,16 +62,10 @@ export default function Home() {
   const [activeConversation, setActiveConversation] = useState(8);
   const [showMainChatHistory, setShowMainChatHistory] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [newConversationRef, setNewConversationRef] = useState<DocumentReference<DocumentData> | null>(null);
-
 
   useEffect(() => {
     setMounted(true);
-    const conversationsCol = collection(db, 'conversations');
-    const newDocRef = doc(conversationsCol); 
-    setNewConversationRef(newDocRef);
   }, []);
-
 
   const [messages] = useState([
     { role: 'user', content: 'testing this' },
@@ -111,8 +91,6 @@ export default function Home() {
     setIsChatting(false);
     setShowMainChatHistory(false);
   };
-
-
 
   if (!mounted) return null;
 

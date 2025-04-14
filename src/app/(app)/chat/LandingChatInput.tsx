@@ -1,16 +1,12 @@
-import { DocumentData, } from 'firebase/firestore';
-import { DocumentReference } from 'firebase/firestore';
+// Removed unused imports: DocumentData, DocumentReference
 import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { createConversation } from '@/lib/conversations';
 import { useRouter } from 'next/navigation';
 
-type Props = {
-  newConversationRef: DocumentReference<DocumentData> | null;
-}
-
-export const LandingChatInput: React.FC<Props> = ({ newConversationRef }) => {
+// Removed Props type and component prop
+export const LandingChatInput: React.FC = () => {
   const textareaRef = useRef(null);
   const [inputValue, setInputValue] = useState('');
   const router = useRouter();
@@ -19,13 +15,15 @@ export const LandingChatInput: React.FC<Props> = ({ newConversationRef }) => {
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
         e.preventDefault();
-        const conversationRef = await createConversation({
-          conversationRef: newConversationRef!,
-          userId: '123',
+        // Call createConversation without conversationRef, get ID directly
+        const conversationId = await createConversation({
+          // userId: '123', // TODO: Replace with actual authenticated user ID
+          userId: 'temp-user-id', // Placeholder until auth is integrated
           message: inputValue,
         });
 
-        router.push(`/chat/${conversationRef.id}`);
+        // Use the returned ID for navigation
+        router.push(`/chat/${conversationId}`);
     }
     };
 
