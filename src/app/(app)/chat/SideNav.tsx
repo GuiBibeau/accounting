@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getConversations, Conversation } from '@/lib/conversations';
-import { useAuth, useLogout } from '@/contexts/AuthContext'; 
+import { useAuth, useLogout } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button'; 
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'; 
+} from '@/components/ui/dialog';
 const sidebarVariants = {
   expanded: {
     width: '200px',
@@ -112,18 +112,20 @@ export const SideNav = () => {
               exit={{ opacity: 0 }}
               className="font-semibold"
             >
-              Aiccountant
+              <Link href="/chat">Aiccountant</Link>
             </motion.span>
           ) : (
-            <motion.div
-              key="collapsed-icon"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 500 }}
-            >
-              <Calculator className="w-5 h-5 text-blue-300" />
-            </motion.div>
+            <Link href="/chat">
+              <motion.div
+                key="collapsed-icon"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 500 }}
+              >
+                <Calculator className="w-5 h-5 text-blue-300" />
+              </motion.div>
+            </Link>
           )}
         </AnimatePresence>
       </div>

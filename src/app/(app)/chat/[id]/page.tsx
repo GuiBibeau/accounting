@@ -35,7 +35,7 @@ export default function ChatPage() {
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.2, duration: 0.4 }}
+            transition={{ delay: index * 0.25, duration: 0.6 }} // Slower duration and adjusted delay
             className={`mb-6 ${message.role === 'user' ? 'flex justify-end' : ''}`}
           >
             {message.role === 'user' ? (
@@ -113,12 +113,7 @@ export default function ChatPage() {
         ))}
       </div>
 
-      <motion.div
-        className="p-4 border-t border-gray-800"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
+      <div className="p-4 border-t border-gray-800">
         <div className="relative">
           <motion.div
             className="rounded-xl bg-[#333] border border-gray-700 overflow-hidden"
@@ -147,7 +142,7 @@ export default function ChatPage() {
             </div>
           </motion.div>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }

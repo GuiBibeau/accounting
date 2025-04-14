@@ -5,12 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getConversation } from '@/lib/conversations';
 
-const pageTransition = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 },
-};
-
 export default function ChatLayout({
   children,
 }: {
@@ -30,16 +24,16 @@ export default function ChatLayout({
 
     fetchTitle();
   }, [id]);
+
+  const titleBarAnimation = { // Corrected typo: consst -> const
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.5 } }, // Increased duration
+  };
+
   return (
-    <motion.div
-      key="chat-view"
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      variants={pageTransition}
-      className="flex-1 flex flex-col"
-    >
+    <div className="flex-1 flex flex-col">
       <div className="p-4 flex items-center">
+        {/* Back button is now outside the animated div */}
         <div className="flex items-center gap-3">
           <motion.button
             className="p-1 rounded-full"
@@ -50,10 +44,18 @@ export default function ChatLayout({
             <ChevronLeft className="w-5 h-5" />
           </motion.button>
         </div>
-        <div className="flex-1 text-center font-medium">{title}</div>
-        <div className="w-5"></div> 
+        {/* Animated container for title and spacer */}
+        <motion.div
+          className="flex-1 flex items-center justify-center" // Adjusted classes for centering title
+          initial="hidden"
+          animate="visible"
+          variants={titleBarAnimation}
+        >
+          <div className="flex-1 text-center font-medium">{title}</div>
+          <div className="w-5"></div> {/* Spacer remains to balance layout */}
+        </motion.div>
       </div>
       {children}
-    </motion.div>
+    </div>
   );
 }
