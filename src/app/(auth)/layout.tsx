@@ -1,4 +1,3 @@
-import { AuthProvider } from "@/contexts/AuthContext";
 import "../globals.css";
 import AuthHeader from "@/components/AuthHeader";
 
@@ -9,9 +8,9 @@ export default async function WithHeaderLayout({
 }) {
 
   return (
-    <AuthProvider>
+    <>
       <AuthHeader />
       {children}
-    </AuthProvider>
+    </>
   );
 }

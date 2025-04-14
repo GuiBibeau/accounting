@@ -1,18 +1,16 @@
 'use client';
 
-// Removed Image import
-import { MessageSquare, ArrowLeft } from 'lucide-react'; // Removed Calculator import
+import { MessageSquare, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Conversation } from '../../lib/conversations';
 import { Message } from '../../lib/messages';
-import { useRef } from 'react'; // Added useRef
-import { ChatInput } from './ChatInput'; // Import the new component
-import { ChatHeader } from './ChatHeader'; // Import ChatHeader
-import { MessageList } from './MessageList'; // Import MessageList
-import { HomeView } from './HomeView'; // Import HomeView
-import { ReactNode } from 'react'; // Import ReactNode for icon type
+import { useRef } from 'react';
+import { ChatInput } from './ChatInput';
+import { ChatHeader } from './ChatHeader';
+import { MessageList } from './MessageList';
+import { HomeView } from './HomeView';
+import { ReactNode } from 'react';
 
-// Animation variants (Consider moving to a shared file)
 const listItemVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: (i: number) => ({
@@ -45,22 +43,19 @@ const pageTransition = {
   },
 };
 
-// Removed sample data for Home View cards and action buttons as they are now props for HomeView
-
 interface MainContentProps {
   isChatting: boolean;
   showMainChatHistory: boolean;
-  activeConversation: number | null;
+  activeConversation: string | null;
   conversationHistory: Conversation[];
   messages: Message[];
   inputValue: string;
   setInputValue: (value: string) => void;
-  onSelectConversation: (id: number) => void;
+  onSelectConversation: (id: string) => void;
   onGoToHome: () => void;
-  onStartChat: (message?: string) => void; // Allow passing initial message
-  onSendMessage: () => void; // Function to handle sending message
-  onSetIsChatting: (isChatting: boolean) => void; // Function to set chatting state
-  // Add props needed by HomeView
+  onStartChat: (message?: string) => void;
+  onSendMessage: () => void;
+  onSetIsChatting: (isChatting: boolean) => void;
   actionButtons: { icon: ReactNode; text: string; mobileText: string }[];
   homeCards: { src: string; alt: string; title: string }[];
 }
@@ -78,24 +73,19 @@ export function MainContent({
   onStartChat,
   onSendMessage,
   onSetIsChatting,
-  // Destructure new props
   actionButtons,
   homeCards,
 }: MainContentProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null); // Typed useRef
-
-  // Removed unused handleKeyDown function
-  // Removed unused focusInput function
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const currentConversationTitle =
     conversationHistory.find((c) => c.id === activeConversation)?.title ||
-    'New Chat'; // Default title
+    'New Chat';
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
       <AnimatePresence mode="wait">
         {showMainChatHistory ? (
-          // Conversation History Page in Main Content
           <motion.div
             key="history-view"
             initial="hidden"
@@ -152,7 +142,6 @@ export function MainContent({
             </div>
           </motion.div>
         ) : isChatting ? (
-          // Chat View
           <motion.div
             key="chat-view"
             initial="hidden"
@@ -161,30 +150,24 @@ export function MainContent({
             variants={pageTransition}
             className="flex-1 flex flex-col"
           >
-            {/* Use ChatHeader component */}
             <ChatHeader
               title={currentConversationTitle}
               onBack={() => onSetIsChatting(false)}
             />
 
-            {/* Use MessageList component */}
             <MessageList messages={messages} />
 
-            {/* Chat Input */}
             <ChatInput
               inputValue={inputValue}
               setInputValue={setInputValue}
               onSendMessage={onSendMessage}
               placeholder="Ask anything..."
-              // Removed textareaRef prop as ChatInput manages its own ref
             />
           </motion.div>
         ) : (
-          // Use HomeView component
           <HomeView
-            // Pass necessary props down
-            actionButtons={actionButtons} // Pass down actual data
-            homeCards={homeCards} // Pass down actual data
+            actionButtons={actionButtons}
+            homeCards={homeCards}
             inputValue={inputValue}
             setInputValue={setInputValue}
             onStartChat={onStartChat}

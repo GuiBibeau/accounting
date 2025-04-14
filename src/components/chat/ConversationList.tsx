@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 import { Conversation } from '../../lib/conversations';
 
-// Animation variants (can be moved to a shared file)
 const listItemVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: (i: number) => ({
@@ -19,10 +18,10 @@ const listItemVariants = {
 
 interface ConversationListProps {
   conversations: Conversation[];
-  activeConversation: number | null;
-  onSelectConversation: (id: number) => void;
+  activeConversation: string | null;
+  onSelectConversation: (id: string) => void;
   onViewAllConversations: () => void;
-  maxVisible?: number; // Optional prop to limit visible items
+  maxVisible?: number;
 }
 
 export function ConversationList({
@@ -30,7 +29,7 @@ export function ConversationList({
   activeConversation,
   onSelectConversation,
   onViewAllConversations,
-  maxVisible = 5, // Default to showing 5 recent conversations
+  maxVisible = 5,
 }: ConversationListProps) {
   const visibleConversations = conversations.slice(0, maxVisible);
   const showViewAll = conversations.length > maxVisible;
@@ -69,9 +68,9 @@ export function ConversationList({
           whileTap={{ scale: 0.98 }}
           onClick={onViewAllConversations}
           className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-gray-400 rounded-md"
-          initial={{ opacity: 0 }} // Add initial animation state
-          animate={{ opacity: 1 }} // Add animate state
-          transition={{ delay: visibleConversations.length * 0.05 + 0.1 }} // Delay after list items
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: visibleConversations.length * 0.05 + 0.1 }}
         >
           <span className="ml-6">View all conversations...</span>
         </motion.button>

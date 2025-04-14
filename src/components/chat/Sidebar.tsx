@@ -8,10 +8,9 @@ import {
   HomeIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Conversation } from '../../lib/conversations'; // Use relative path
-import { ConversationList } from './ConversationList'; // Import the new component
+import { Conversation } from '../../lib/conversations';
+import { ConversationList } from './ConversationList';
 
-// Animation variants (can be moved to a shared file later)
 const sidebarVariants = {
   expanded: {
     width: '200px',
@@ -47,14 +46,12 @@ const fadeIn = {
   },
 };
 
-// Removed unused listItemVariants
-
 interface SidebarProps {
   isExpanded: boolean;
   toggleSidebar: () => void;
   conversationHistory: Conversation[];
-  activeConversation: number | null;
-  onSelectConversation: (id: number) => void;
+  activeConversation: string | null;
+  onSelectConversation: (id: string) => void;
   onViewAllConversations: () => void;
   onGoToHome: () => void;
 }
@@ -70,12 +67,11 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <motion.div
-      className="border-r border-gray-800 flex flex-col relative h-full" // Added h-full
+      className="border-r border-gray-800 flex flex-col relative h-full"
       initial={isExpanded ? 'expanded' : 'collapsed'}
       animate={isExpanded ? 'expanded' : 'collapsed'}
       variants={sidebarVariants}
     >
-      {/* Header */}
       <div className="p-4 flex items-center justify-center gap-2 border-b border-gray-800">
         <AnimatePresence mode="wait">
           {isExpanded ? (
@@ -102,7 +98,6 @@ export function Sidebar({
         </AnimatePresence>
       </div>
 
-      {/* Toggle Button */}
       <motion.button
         className="absolute -right-3 top-14 transform bg-gray-800 rounded-full p-1 border border-gray-700 z-10 hover:bg-gray-700 transition-colors"
         onClick={toggleSidebar}
@@ -135,11 +130,9 @@ export function Sidebar({
         </AnimatePresence>
       </motion.button>
 
-      {/* Navigation */}
       <div className="flex-1 py-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           {isExpanded ? (
-            // Expanded view - Only show recent conversations, no chat history option
             <motion.div
               key="expanded-nav"
               initial="hidden"
@@ -154,17 +147,15 @@ export function Sidebar({
                 </h2>
               </div>
 
-              {/* Use ConversationList component */}
               <ConversationList
                 conversations={conversationHistory}
                 activeConversation={activeConversation}
                 onSelectConversation={onSelectConversation}
                 onViewAllConversations={onViewAllConversations}
-                maxVisible={5} // Keep the limit consistent
+                maxVisible={5}
               />
             </motion.div>
           ) : (
-            // Collapsed view - Show home and history icons
             <motion.div
               key="collapsed-nav"
               initial="hidden"
@@ -202,7 +193,6 @@ export function Sidebar({
         </AnimatePresence>
       </div>
 
-      {/* Me Button */}
       <div className="p-4 border-t border-gray-800">
         <motion.button
           whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}

@@ -1,35 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { MainContent } from '@/components/chat/MainContent';
-import { Conversation } from '@/lib/conversations';
+import { Conversation, getConversations } from '@/lib/conversations';
 import { Message } from '@/lib/messages';
-import { ReactNode } from 'react'; // Import ReactNode for icon type
+import { useAuth } from '@/contexts/AuthContext';
+import { Unsubscribe } from 'firebase/firestore';
 
-// Sample conversation history data (can be fetched from an API later)
-const sampleConversationHistory: Conversation[] = [
-  { id: 1, title: 'Monthly Expense Report', date: 'Apr 12' },
-  { id: 2, title: 'Client Invoice #1042', date: 'Apr 10' },
-  { id: 3, title: 'Payroll Processing', date: 'Apr 8' },
-  { id: 4, title: 'Tax Deduction Analysis', date: 'Apr 7' },
-  { id: 5, title: 'Vendor Payment Schedule', date: 'Apr 5' },
-  { id: 6, title: 'Employee Timesheet Review', date: 'Apr 3' },
-  { id: 7, title: 'Quarterly Financial Report', date: 'Apr 1' },
-  { id: 8, title: 'testing this', date: 'Today', active: true },
-];
-
-// Sample messages (can be fetched based on active conversation)
 const sampleMessages: Message[] = [
   { role: 'user', content: 'testing this' },
   {
     role: 'assistant',
     content:
-      "Hello! I'd be happy to help you test this system. Is there something specific you'd like me to test or demonstrate for you?\n\nI can assist with a wide range of tasks such as:\n\n* Searching for information online\n* Answering questions on various topics\n* Creating visual content like images or slides\n* Finding products or travel information\n* Analyzing images or videos\n* And much more\n\nPlease let me know how I can help!", // Completed sentence
+      "Hello! I'd be happy to help you test this system. Is there something specific you'd like me to test or demonstrate for you?\n\nI can assist with a wide range of tasks such as:\n\n* Searching for information online\n* Answering questions on various topics\n* Creating visual content like images or slides\n* Finding products or travel information\n* Analyzing images or videos\n* And much more\n\nPlease let me know how I can help!",
   },
 ];
 
-// Define types for HomeView props (consider moving to a shared types file)
 interface ActionButton {
   icon: ReactNode;
   text: string;
@@ -42,7 +29,6 @@ interface HomeCard {
   title: string;
 }
 
-// Sample data for Home View (can be fetched later)
 const sampleActionButtons: ActionButton[] = [
   {
     icon: (
@@ -181,32 +167,36 @@ const sampleHomeCards: HomeCard[] = [
 export default function ChatPage() {
   const [isChatting, setIsChatting] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [activeConversation, setActiveConversation] = useState<number | null>(
+  const [activeConversation, setActiveConversation] = useState<string | null>(
     null
-  ); // Start with no active conversation
+  );
   const [showMainChatHistory, setShowMainChatHistory] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const { user } = useAuth();
 
-  // State for conversation history and messages
-  const [conversationHistory, setConversationHistory] = useState<
-    Conversation[]
-  >([]);
+  const [conversationHistory, setConversationHistory] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Ensure animations only run after component is mounted
   useEffect(() => {
     setMounted(true);
-    // Load initial data (replace with API calls later)
-    setConversationHistory(sampleConversationHistory);
-    // Optionally load messages for the default active conversation if any
-    const defaultActive = sampleConversationHistory.find((c) => c.active);
-    if (defaultActive) {
-      setActiveConversation(defaultActive.id);
-      setMessages(sampleMessages); // Load sample messages for the active chat
-      setIsChatting(true); // Start in chat view if there's an active convo
+
+    let unsubscribe: Unsubscribe = () => {};
+
+    if (user?.uid) {
+      unsubscribe = getConversations(user.uid, (fetchedConversations) => {
+        setConversationHistory(fetchedConversations);
+      });
+    } else {
+      setConversationHistory([]);
+      setActiveConversation(null);
+      setIsChatting(false);
     }
-  }, []);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user]);
 
   const toggleSidebar = () => {
     setSidebarExpanded(!sidebarExpanded);
@@ -215,14 +205,14 @@ export default function ChatPage() {
   const viewAllConversations = () => {
     setShowMainChatHistory(true);
     setIsChatting(false);
-    setActiveConversation(null); // Deactivate conversation when viewing history
+    setActiveConversation(null);
   };
 
-  const selectConversation = (id: number) => {
+  const selectConversation = (id: string) => {
     setActiveConversation(id);
-    // Fetch messages for this conversation (replace with API call)
+    // TODO: Fetch messages for this conversation
     console.log(`Fetching messages for conversation ${id}`);
-    setMessages(sampleMessages); // Use sample messages for now
+    setMessages(sampleMessages);
     setIsChatting(true);
     setShowMainChatHistory(false);
   };
@@ -230,18 +220,17 @@ export default function ChatPage() {
   const goToHome = () => {
     setIsChatting(false);
     setShowMainChatHistory(false);
-    setActiveConversation(null); // Deactivate conversation when going home
+    setActiveConversation(null);
   };
 
   const startChat = (initialMessage?: string) => {
-    // Logic to start a new chat, potentially with an initial message
     console.log('Starting new chat with message:', initialMessage);
-    setActiveConversation(null); // No active conversation ID for new chat yet
+    setActiveConversation(null);
     setMessages(initialMessage ? [{ role: 'user', content: initialMessage }] : []);
     setIsChatting(true);
     setShowMainChatHistory(false);
     if (initialMessage) {
-      setInputValue(''); // Clear input if suggestion was clicked
+      setInputValue('');
       // Potentially send the initial message to the backend here
     }
   };
@@ -252,9 +241,9 @@ export default function ChatPage() {
     const newMessage: Message = { role: 'user', content: inputValue.trim() };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
 
-    // TODO: Send message to backend API
+    // TODO: Send message to backend API & handle response
     console.log('Sending message:', newMessage);
-    // Simulate assistant response after a delay
+    // Simulate assistant response
     setTimeout(() => {
       const assistantResponse: Message = {
         role: 'assistant',
@@ -263,10 +252,10 @@ export default function ChatPage() {
       setMessages((prevMessages) => [...prevMessages, assistantResponse]);
     }, 1000);
 
-    setInputValue(''); // Clear input field
+    setInputValue('');
   };
 
-  if (!mounted) return null; // Prevent rendering server-side or before hydration
+  if (!mounted) return null;
 
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden">
@@ -283,16 +272,15 @@ export default function ChatPage() {
         isChatting={isChatting}
         showMainChatHistory={showMainChatHistory}
         activeConversation={activeConversation}
-        conversationHistory={conversationHistory} // Pass full history for history view
+        conversationHistory={conversationHistory}
         messages={messages}
         inputValue={inputValue}
         setInputValue={setInputValue}
-        onSelectConversation={selectConversation} // Pass down for history view interaction
-        onGoToHome={goToHome} // Pass down for history view interaction
-        onStartChat={startChat} // Pass down for home view interaction
-        onSendMessage={handleSendMessage} // Pass down for input interaction
-        onSetIsChatting={setIsChatting} // Pass down for chat header back button
-        // Pass down HomeView data
+        onSelectConversation={selectConversation}
+        onGoToHome={goToHome}
+        onStartChat={startChat}
+        onSendMessage={handleSendMessage}
+        onSetIsChatting={setIsChatting}
         actionButtons={sampleActionButtons}
         homeCards={sampleHomeCards}
       />
