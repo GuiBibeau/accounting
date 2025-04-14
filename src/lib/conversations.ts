@@ -6,6 +6,8 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  doc,
+  getDoc,
   Timestamp,
   Unsubscribe,
 } from 'firebase/firestore';
@@ -70,4 +72,38 @@ export const getConversations = (
   );
 
   return unsubscribe;
+};
+
+/**
+ * Fetches a single conversation by ID
+ * @param conversationId The ID of the conversation to fetch
+ * @returns Promise resolving to the conversation or null if not found
+ */
+export const getConversation = async (
+  conversationId: string
+): Promise<Conversation | null> => {
+  if (!conversationId) {
+    console.error('getConversation: conversationId is required');
+    return null;
+  }
+
+  try {
+    const docRef = doc(db, 'conversations', conversationId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        userId: data.userId,
+        title: data.title ?? 'Untitled Conversation',
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt
+      } as Conversation;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
+    return null;
+  }
 };
