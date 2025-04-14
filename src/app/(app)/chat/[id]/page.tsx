@@ -1,33 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ChevronLeft, PaperclipIcon, SendHorizontal } from 'lucide-react';
+import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { getMessages, Message } from '@/lib/messages';
 
-const pageTransition = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      ease: 'easeOut',
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    transition: {
-      duration: 0.3,
-      ease: 'easeIn',
-    },
-  },
-};
+
 
 export default function ChatPage() {
-  const [, setIsChatting] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [, setIsLoading] = useState(true);
   const { id: conversationId } = useParams();

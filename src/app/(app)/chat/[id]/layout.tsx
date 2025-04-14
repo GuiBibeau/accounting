@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getConversation } from '@/lib/conversations';
 
@@ -17,6 +17,7 @@ export default function ChatLayout({
   children: React.ReactNode;
 }) {
   const { id } = useParams();
+  const router = useRouter();
   const [title, setTitle] = useState('Loading...');
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function ChatLayout({
             className="p-1 rounded-full"
             whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
             whileTap={{ scale: 0.9 }}
+            onClick={() => router.back()}
           >
             <ChevronLeft className="w-5 h-5" />
           </motion.button>

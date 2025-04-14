@@ -9,7 +9,7 @@ import {
   Calculator,
   ArrowLeft,
 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LandingChatInput } from './LandingChatInput';
 const conversationHistory = [
@@ -27,7 +27,7 @@ const conversationHistory = [
 
 const listItemVariants = {
   hidden: { opacity: 0, y: 10 },
-  visible: (i) => ({
+  visible: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
@@ -62,7 +62,6 @@ export default function Home() {
   const [activeConversation, setActiveConversation] = useState(8);
   const [showMainChatHistory, setShowMainChatHistory] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [inputValue, setInputValue] = useState('');
 
 
   useEffect(() => {
