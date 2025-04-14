@@ -10,18 +10,9 @@ import {
   History,
   MessageSquare,
 } from 'lucide-react';
-import { useState } from 'react';
-
-const conversationHistory = [
-  { id: 1, title: 'Monthly Expense Report', date: 'Apr 12' },
-  { id: 2, title: 'Client Invoice #1042', date: 'Apr 10' },
-  { id: 3, title: 'Payroll Processing', date: 'Apr 8' },
-  { id: 4, title: 'Tax Deduction Analysis', date: 'Apr 7' },
-  { id: 5, title: 'Vendor Payment Schedule', date: 'Apr 5' },
-  { id: 6, title: 'Employee Timesheet Review', date: 'Apr 3' },
-  { id: 7, title: 'Quarterly Financial Report', date: 'Apr 1' },
-  { id: 8, title: 'testing this', date: 'Today', active: true },
-];
+import { useState, useEffect } from 'react';
+import { getConversations, Conversation } from '@/lib/conversations';
+import { useAuth } from '@/contexts/AuthContext';
 
 const sidebarVariants = {
   expanded: {
@@ -72,13 +63,25 @@ const fadeIn = {
 
 export const SideNav = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [activeConversation] = useState(8);
+  const [activeConversation] = useState<string | null>(null);
+  const [conversationHistory, setConversationHistory] = useState<Conversation[]>([]);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const unsubscribe = getConversations(user.uid, (conversations) => {
+      setConversationHistory(conversations);
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid]);
 
   const toggleSidebar = () => {
     setSidebarExpanded(!sidebarExpanded);
   };
 
-  const selectConversation = (_: number) => {};
+  const selectConversation = (_id: string) => {};
 
   const viewAllConversations = () => {};
   const goToHome = () => {};
