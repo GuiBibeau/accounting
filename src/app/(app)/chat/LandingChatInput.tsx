@@ -4,10 +4,12 @@ import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { createConversation } from '@/lib/conversations';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Removed Props type and component prop
 export const LandingChatInput: React.FC = () => {
   const textareaRef = useRef(null);
+  const { user } = useAuth();
   const [inputValue, setInputValue] = useState('');
   const router = useRouter();
   
@@ -17,8 +19,7 @@ export const LandingChatInput: React.FC = () => {
         e.preventDefault();
         // Call createConversation without conversationRef, get ID directly
         const conversationId = await createConversation({
-          // userId: '123', // TODO: Replace with actual authenticated user ID
-          userId: 'temp-user-id', // Placeholder until auth is integrated
+          userId: user?.uid as string,
           message: inputValue,
         });
 

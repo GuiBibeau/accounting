@@ -11,8 +11,6 @@ export default function ChatPage() {
   const [, setIsLoading] = useState(true);
   const { id: conversationId } = useParams();
 
-
-
   useEffect(() => {
     if (!conversationId) return;
 

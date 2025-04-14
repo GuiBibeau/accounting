@@ -9,11 +9,21 @@ import {
   HomeIcon,
   History,
   MessageSquare,
+  User, // Added User icon
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getConversations, Conversation } from '@/lib/conversations';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, useLogout } from '@/contexts/AuthContext'; // Added useLogout
 import Link from 'next/link';
+import { Button } from '@/components/ui/button'; // Added Button
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'; // Added Dialog components
 const sidebarVariants = {
   expanded: {
     width: '200px',
@@ -68,6 +78,7 @@ export const SideNav = () => {
     Conversation[]
   >([]);
   const { user } = useAuth();
+  const { logout } = useLogout(); // Get logout function
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -252,42 +263,50 @@ export const SideNav = () => {
         </AnimatePresence>
       </div>
 
-      {/* Me Button */}
+      {/* Me Button / Account Dialog */}
       <div className="p-4 border-t border-gray-800">
-        <motion.button
-          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-          whileTap={{ scale: 0.95 }}
-          className={`w-full flex items-center ${
-            sidebarExpanded ? 'px-2' : 'justify-center'
-          } py-1.5 text-sm rounded-md`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="8" r="5" />
-            <path d="M20 21a8 8 0 1 0-16 0" />
-          </svg>
-          <AnimatePresence>
-            {sidebarExpanded && (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                className="ml-2 overflow-hidden"
-              >
-                Me
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              className={`w-full flex items-center ${
+                sidebarExpanded ? 'justify-start px-2' : 'justify-center px-0'
+              } py-1.5 text-sm rounded-md`}
+            >
+              <User className="h-4 w-4 flex-shrink-0" />
+              <AnimatePresence>
+                {sidebarExpanded && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="ml-2 overflow-hidden whitespace-nowrap"
+                  >
+                    Me
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Account</DialogTitle>
+              <DialogDescription>
+                Manage your account settings. Click disconnect to log out.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {/* Future account options can go here */}
+              {user?.email && (
+                 <div className="text-sm text-muted-foreground">Logged in as: {user.email}</div>
+              )}
+            </div>
+             {/* Changed DialogFooter to just a Button for simplicity */}
+            <Button variant="destructive" onClick={logout} className="w-full">
+              Disconnect
+            </Button>
+          </DialogContent>
+        </Dialog>
       </div>
     </motion.div>
   );
