@@ -1,22 +1,14 @@
 'use client';
 
-import Image from 'next/image';
-import {
-  PaperclipIcon,
-  SendHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  MessageSquare,
-  Calculator,
-  History,
-  HomeIcon,
-  ArrowLeft,
-} from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Sidebar } from '@/components/chat/Sidebar';
+import { MainContent } from '@/components/chat/MainContent';
+import { Conversation } from '@/lib/conversations';
+import { Message } from '@/lib/messages';
+import { ReactNode } from 'react'; // Import ReactNode for icon type
 
-// Sample conversation history data
-const conversationHistory = [
+// Sample conversation history data (can be fetched from an API later)
+const sampleConversationHistory: Conversation[] = [
   { id: 1, title: 'Monthly Expense Report', date: 'Apr 12' },
   { id: 2, title: 'Client Invoice #1042', date: 'Apr 10' },
   { id: 3, title: 'Payroll Processing', date: 'Apr 8' },
@@ -27,914 +19,283 @@ const conversationHistory = [
   { id: 8, title: 'testing this', date: 'Today', active: true },
 ];
 
-// Animation variants
-const sidebarVariants = {
-  expanded: {
-    width: '200px',
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-    },
+// Sample messages (can be fetched based on active conversation)
+const sampleMessages: Message[] = [
+  { role: 'user', content: 'testing this' },
+  {
+    role: 'assistant',
+    content:
+      "Hello! I'd be happy to help you test this system. Is there something specific you'd like me to test or demonstrate for you?\n\nI can assist with a wide range of tasks such as:\n\n* Searching for information online\n* Answering questions on various topics\n* Creating visual content like images or slides\n* Finding products or travel information\n* Analyzing images or videos\n* And much more\n\nPlease let me know how I can help!", // Completed sentence
   },
-  collapsed: {
-    width: '60px',
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-};
+];
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.3,
-    },
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
+// Define types for HomeView props (consider moving to a shared types file)
+interface ActionButton {
+  icon: ReactNode;
+  text: string;
+  mobileText: string;
+}
 
-const listItemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.05,
-      duration: 0.3,
-    },
-  }),
-};
+interface HomeCard {
+  src: string;
+  alt: string;
+  title: string;
+}
 
-const pageTransition = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      ease: 'easeOut',
-    },
+// Sample data for Home View (can be fetched later)
+const sampleActionButtons: ActionButton[] = [
+  {
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-3 h-3 sm:w-4 sm:h-4"
+      >
+        <rect width="18" height="18" x="3" y="3" rx="2" />
+        <path d="M3 9h18" />
+        <path d="M9 21V9" />
+      </svg>
+    ),
+    text: 'Generate Timesheet',
+    mobileText: 'Timesheet',
   },
-  exit: {
-    opacity: 0,
-    y: -20,
-    transition: {
-      duration: 0.3,
-      ease: 'easeIn',
-    },
+  {
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-3 h-3 sm:w-4 sm:h-4"
+      >
+        <path d="M21 14H3" />
+        <path d="M21 9H3" />
+        <path d="M21 4H3" />
+        <path d="M21 19H3" />
+      </svg>
+    ),
+    text: 'Send Invoice',
+    mobileText: 'Invoice',
   },
-};
+  {
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-3 h-3 sm:w-4 sm:h-4"
+      >
+        <circle cx="8" cy="21" r="1" />
+        <circle cx="19" cy="21" r="1" />
+        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+      </svg>
+    ),
+    text: 'View Payables',
+    mobileText: 'Payables',
+  },
+  {
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-3 h-3 sm:w-4 sm:h-4"
+      >
+        <path d="M12 2v20" />
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      </svg>
+    ),
+    text: 'Track Expenses',
+    mobileText: 'Expenses',
+  },
+  {
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-3 h-3 sm:w-4 sm:h-4"
+      >
+        <rect width="20" height="14" x="2" y="5" rx="2" />
+        <line x1="2" x2="22" y1="10" y2="10" />
+      </svg>
+    ),
+    text: 'Run Payroll',
+    mobileText: 'Payroll',
+  },
+];
 
-export default function Home() {
+const sampleHomeCards: HomeCard[] = [
+  {
+    src: '/financial-overview-dashboard.png',
+    alt: 'Financial planning dashboard',
+    title: 'Business Cash Flow Management: Optimizing Working Capital',
+  },
+  {
+    src: '/tax-documents-organized.png',
+    alt: 'Tax preparation documents',
+    title: 'Small Business Tax Strategies: Maximizing Deductions',
+  },
+  {
+    src: '/growth-strategy-overview.png',
+    alt: 'Investment portfolio analysis',
+    title: 'Inventory Management: Reducing Costs While Meeting Demand',
+  },
+  {
+    src: '/retirement-planning-abstract.png',
+    alt: 'Retirement planning calculator',
+    title: 'Employee Benefits Analysis: Balancing Costs and Retention',
+  },
+];
+
+export default function ChatPage() {
   const [isChatting, setIsChatting] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [activeConversation, setActiveConversation] = useState(8);
-  const [showSidebarChatHistory, setShowSidebarChatHistory] = useState(false);
+  const [activeConversation, setActiveConversation] = useState<number | null>(
+    null
+  ); // Start with no active conversation
   const [showMainChatHistory, setShowMainChatHistory] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [isInputFocused, setIsInputFocused] = useState(false);
-  const textareaRef = useRef(null);
+
+  // State for conversation history and messages
+  const [conversationHistory, setConversationHistory] = useState<
+    Conversation[]
+  >([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   // Ensure animations only run after component is mounted
   useEffect(() => {
     setMounted(true);
+    // Load initial data (replace with API calls later)
+    setConversationHistory(sampleConversationHistory);
+    // Optionally load messages for the default active conversation if any
+    const defaultActive = sampleConversationHistory.find((c) => c.active);
+    if (defaultActive) {
+      setActiveConversation(defaultActive.id);
+      setMessages(sampleMessages); // Load sample messages for the active chat
+      setIsChatting(true); // Start in chat view if there's an active convo
+    }
   }, []);
 
   const toggleSidebar = () => {
     setSidebarExpanded(!sidebarExpanded);
   };
 
-  const toggleSidebarChatHistory = () => {
-    setShowSidebarChatHistory(!showSidebarChatHistory);
-    if (!sidebarExpanded) {
-      setSidebarExpanded(true);
-    }
-  };
-
   const viewAllConversations = () => {
     setShowMainChatHistory(true);
     setIsChatting(false);
+    setActiveConversation(null); // Deactivate conversation when viewing history
   };
 
-  const [messages, setMessages] = useState([
-    { role: 'user', content: 'testing this' },
-    {
-      role: 'assistant',
-      content:
-        "Hello! I'd be happy to help you test this system. Is there something specific you'd like me to test or demonstrate for you?\n\nI can assist with a wide range of tasks such as:\n\n* Searching for information online\n* Answering questions on various topics\n* Creating visual content like images or slides\n* Finding products or travel information\n* Analyzing images or videos\n* And much more\n\nPlease",
-    },
-  ]);
-
-  const startChat = () => {
-    setIsChatting(true);
-    setShowMainChatHistory(false);
-  };
-
-  const selectConversation = (id) => {
+  const selectConversation = (id: number) => {
     setActiveConversation(id);
+    // Fetch messages for this conversation (replace with API call)
+    console.log(`Fetching messages for conversation ${id}`);
+    setMessages(sampleMessages); // Use sample messages for now
     setIsChatting(true);
-    setShowSidebarChatHistory(false);
     setShowMainChatHistory(false);
   };
 
   const goToHome = () => {
     setIsChatting(false);
     setShowMainChatHistory(false);
+    setActiveConversation(null); // Deactivate conversation when going home
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
-      e.preventDefault();
-      startChat();
-      setInputValue('');
+  const startChat = (initialMessage?: string) => {
+    // Logic to start a new chat, potentially with an initial message
+    console.log('Starting new chat with message:', initialMessage);
+    setActiveConversation(null); // No active conversation ID for new chat yet
+    setMessages(initialMessage ? [{ role: 'user', content: initialMessage }] : []);
+    setIsChatting(true);
+    setShowMainChatHistory(false);
+    if (initialMessage) {
+      setInputValue(''); // Clear input if suggestion was clicked
+      // Potentially send the initial message to the backend here
     }
   };
 
-  const focusInput = () => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
+  const handleSendMessage = () => {
+    if (!inputValue.trim()) return;
+
+    const newMessage: Message = { role: 'user', content: inputValue.trim() };
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+    // TODO: Send message to backend API
+    console.log('Sending message:', newMessage);
+    // Simulate assistant response after a delay
+    setTimeout(() => {
+      const assistantResponse: Message = {
+        role: 'assistant',
+        content: `Okay, I received: "${newMessage.content}". I'm processing that now...`,
+      };
+      setMessages((prevMessages) => [...prevMessages, assistantResponse]);
+    }, 1000);
+
+    setInputValue(''); // Clear input field
   };
 
-  if (!mounted) return null;
+  if (!mounted) return null; // Prevent rendering server-side or before hydration
 
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden">
-      {/* Sidebar */}
-      <motion.div
-        className="border-r border-gray-800 flex flex-col relative"
-        initial={sidebarExpanded ? 'expanded' : 'collapsed'}
-        animate={sidebarExpanded ? 'expanded' : 'collapsed'}
-        variants={sidebarVariants}
-      >
-        <div className="p-4 flex items-center justify-center gap-2 border-b border-gray-800">
-          <AnimatePresence mode="wait">
-            {sidebarExpanded ? (
-              <motion.span
-                key="expanded-title"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="font-semibold"
-              >
-                Aiccountant
-              </motion.span>
-            ) : (
-              <motion.div
-                key="collapsed-icon"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 500 }}
-              >
-                <Calculator className="w-5 h-5 text-blue-300" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Toggle Button */}
-        <motion.button
-          className="absolute -right-3 top-14 transform bg-gray-800 rounded-full p-1 border border-gray-700 z-10 hover:bg-gray-700 transition-colors"
-          onClick={toggleSidebar}
-          aria-label={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <AnimatePresence mode="wait">
-            {sidebarExpanded ? (
-              <motion.div
-                key="chevron-left"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="chevron-right"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.button>
-
-        {/* Navigation */}
-        <div className="flex-1 py-4 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            {sidebarExpanded ? (
-              // Expanded view - Only show recent conversations, no chat history option
-              <motion.div
-                key="expanded-nav"
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={fadeIn}
-                className="space-y-4"
-              >
-                <div className="px-4">
-                  <h2 className="font-medium text-sm text-gray-400">
-                    Recent Conversations
-                  </h2>
-                </div>
-
-                <div className="space-y-1">
-                  {conversationHistory
-                    .slice(0, 5)
-                    .map((conversation, index) => (
-                      <motion.button
-                        key={conversation.id}
-                        custom={index}
-                        variants={listItemVariants}
-                        initial="hidden"
-                        animate="visible"
-                        whileHover={{
-                          x: 4,
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => selectConversation(conversation.id)}
-                        className={`w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm rounded-md ${
-                          activeConversation === conversation.id
-                            ? 'bg-white/10'
-                            : ''
-                        }`}
-                      >
-                        <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                        <div className="ml-2 overflow-hidden">
-                          <div className="truncate">{conversation.title}</div>
-                          <div className="text-xs text-gray-400">
-                            {conversation.date}
-                          </div>
-                        </div>
-                      </motion.button>
-                    ))}
-
-                  {conversationHistory.length > 5 && (
-                    <motion.button
-                      whileHover={{ x: 4, color: '#fff' }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={viewAllConversations}
-                      className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-gray-400 rounded-md"
-                    >
-                      <span className="ml-6">View all conversations...</span>
-                    </motion.button>
-                  )}
-                </div>
-              </motion.div>
-            ) : (
-              // Collapsed view - Show home and history icons
-              <motion.div
-                key="collapsed-nav"
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={fadeIn}
-                className="flex flex-col items-center pt-4 space-y-6"
-              >
-                <motion.button
-                  onClick={goToHome}
-                  className="p-2 rounded-md hover:bg-white/5"
-                  aria-label="Home"
-                  whileHover={{
-                    scale: 1.1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <HomeIcon className="w-5 h-5" />
-                </motion.button>
-                <motion.button
-                  onClick={viewAllConversations}
-                  className="p-2 rounded-md hover:bg-white/5"
-                  aria-label="View chat history"
-                  whileHover={{
-                    scale: 1.1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <History className="w-5 h-5" />
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Me Button */}
-        <div className="p-4 border-t border-gray-800">
-          <motion.button
-            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-            whileTap={{ scale: 0.95 }}
-            className={`w-full flex items-center ${
-              sidebarExpanded ? 'px-2' : 'justify-center'
-            } py-1.5 text-sm rounded-md`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="8" r="5" />
-              <path d="M20 21a8 8 0 1 0-16 0" />
-            </svg>
-            <AnimatePresence>
-              {sidebarExpanded && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="ml-2 overflow-hidden"
-                >
-                  Me
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.button>
-        </div>
-      </motion.div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <AnimatePresence mode="wait">
-          {showMainChatHistory ? (
-            // Conversation History Page in Main Content - No top navigation
-            <motion.div
-              key="history-view"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={pageTransition}
-              className="flex-1 flex flex-col p-6 overflow-auto"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold">Conversation History</h1>
-                <motion.button
-                  onClick={goToHome}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-md"
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Home</span>
-                </motion.button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {conversationHistory.map((conversation, index) => (
-                  <motion.div
-                    key={conversation.id}
-                    custom={index}
-                    variants={listItemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    whileHover={{
-                      y: -4,
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => selectConversation(conversation.id)}
-                    className="border border-gray-800 rounded-lg p-4 cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <motion.div
-                        className="bg-gray-700 rounded-full p-2"
-                        whileHover={{ backgroundColor: '#4a5568' }}
-                      >
-                        <MessageSquare className="w-5 h-5" />
-                      </motion.div>
-                      <div className="flex-1">
-                        <h3 className="font-medium mb-1">
-                          {conversation.title}
-                        </h3>
-                        <p className="text-sm text-gray-400">
-                          {conversation.date}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          ) : isChatting ? (
-            // Chat View
-            <motion.div
-              key="chat-view"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={pageTransition}
-              className="flex-1 flex flex-col"
-            >
-              {/* Chat Header */}
-              <div className="p-4 flex items-center">
-                <div className="flex items-center gap-3">
-                  <motion.button
-                    className="p-1 rounded-full"
-                    onClick={() => setIsChatting(false)}
-                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </motion.button>
-                </div>
-                <div className="flex-1 text-center font-medium">
-                  {conversationHistory.find((c) => c.id === activeConversation)
-                    ?.title || 'testing this'}
-                </div>
-                <div className="w-5"></div> {/* Empty div for balance */}
-              </div>
-
-              {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4">
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.2, duration: 0.4 }}
-                    className={`mb-6 ${message.role === 'user' ? 'flex justify-end' : ''}`}
-                  >
-                    {message.role === 'user' ? (
-                      <motion.div
-                        className="bg-white/10 rounded-full px-4 py-1.5 max-w-[80%]"
-                        whileHover={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                        }}
-                      >
-                        {message.content}
-                      </motion.div>
-                    ) : (
-                      <div className="max-w-[80%]">
-                        <div className="text-white">
-                          {message.content.split('\n\n').map((paragraph, i) => {
-                            if (paragraph.includes('* ')) {
-                              const items = paragraph
-                                .split('* ')
-                                .filter(Boolean);
-                              return (
-                                <motion.div
-                                  key={i}
-                                  className="mb-4"
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ delay: 0.3 + i * 0.1 }}
-                                >
-                                  <ul className="list-disc pl-5 space-y-1">
-                                    {items.map((item, j) => (
-                                      <motion.li
-                                        key={j}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.4 + j * 0.05 }}
-                                      >
-                                        {item}
-                                      </motion.li>
-                                    ))}
-                                  </ul>
-                                </motion.div>
-                              );
-                            }
-                            return (
-                              <motion.p
-                                key={i}
-                                className="mb-4"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.3 + i * 0.1 }}
-                              >
-                                {paragraph}
-                              </motion.p>
-                            );
-                          })}
-                        </div>
-                        <motion.div
-                          className="flex items-center mt-1"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.5 }}
-                        >
-                          <motion.div
-                            className="w-2 h-2 bg-blue-500 rounded-full mr-1"
-                            animate={{
-                              scale: [1, 1.2, 1],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatType: 'reverse',
-                            }}
-                          ></motion.div>
-                        </motion.div>
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Chat Input */}
-              <motion.div
-                className="p-4 border-t border-gray-800"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="relative">
-                  <motion.div
-                    className="rounded-xl bg-[#333] border border-gray-700 overflow-hidden"
-                    whileFocus={{ borderColor: 'rgba(255, 255, 255, 0.3)' }}
-                    whileHover={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
-                  >
-                    <textarea
-                      className="w-full bg-transparent px-4 py-3 outline-none resize-none h-12"
-                      placeholder="Ask anything, create anything"
-                    ></textarea>
-                    <div className="absolute right-2 bottom-2 flex items-center">
-                      <motion.button
-                        className="p-2 text-gray-400"
-                        whileHover={{ scale: 1.1, color: '#fff' }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <PaperclipIcon className="w-5 h-5" />
-                      </motion.button>
-                      <motion.button
-                        className="p-2 rounded-full bg-blue-500 ml-2"
-                        whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <SendHorizontal className="w-5 h-5 text-white" />
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </motion.div>
-          ) : (
-            // Home View
-            <motion.main
-              key="home-view"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={pageTransition}
-              className="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 overflow-auto"
-            >
-              <motion.h1
-                className="text-2xl sm:text-3xl font-semibold text-center text-blue-300 mb-6 sm:mb-8 flex items-center justify-center"
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-              >
-                Aiccountant
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.3, type: 'spring' }}
-                >
-                  <Calculator className="w-5 h-5 ml-2 text-blue-300" />
-                </motion.div>
-              </motion.h1>
-
-              {/* Action Buttons */}
-              <motion.div
-                className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                {[
-                  {
-                    icon: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-3 h-3 sm:w-4 sm:h-4"
-                      >
-                        <rect width="18" height="18" x="3" y="3" rx="2" />
-                        <path d="M3 9h18" />
-                        <path d="M9 21V9" />
-                      </svg>
-                    ),
-                    text: 'Generate Timesheet',
-                    mobileText: 'Timesheet',
-                  },
-                  {
-                    icon: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-3 h-3 sm:w-4 sm:h-4"
-                      >
-                        <path d="M21 14H3" />
-                        <path d="M21 9H3" />
-                        <path d="M21 4H3" />
-                        <path d="M21 19H3" />
-                      </svg>
-                    ),
-                    text: 'Send Invoice',
-                    mobileText: 'Invoice',
-                  },
-                  {
-                    icon: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-3 h-3 sm:w-4 sm:h-4"
-                      >
-                        <circle cx="8" cy="21" r="1" />
-                        <circle cx="19" cy="21" r="1" />
-                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                      </svg>
-                    ),
-                    text: 'View Payables',
-                    mobileText: 'Payables',
-                  },
-                  {
-                    icon: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-3 h-3 sm:w-4 sm:h-4"
-                      >
-                        <path d="M12 2v20" />
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                      </svg>
-                    ),
-                    text: 'Track Expenses',
-                    mobileText: 'Expenses',
-                  },
-                  {
-                    icon: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-3 h-3 sm:w-4 sm:h-4"
-                      >
-                        <rect width="20" height="14" x="2" y="5" rx="2" />
-                        <line x1="2" x2="22" y1="10" y2="10" />
-                      </svg>
-                    ),
-                    text: 'Run Payroll',
-                    mobileText: 'Payroll',
-                  },
-                ].map((button, index) => (
-                  <motion.button
-                    key={index}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full border border-gray-700 bg-[#333] text-xs sm:text-sm"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + index * 0.05 }}
-                    whileHover={{
-                      backgroundColor: '#444',
-                      y: -2,
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    }}
-                    whileTap={{ scale: 0.95, y: 0 }}
-                  >
-                    {button.icon}
-                    <span className="hidden xs:inline">{button.text}</span>
-                    <span className="xs:hidden">{button.mobileText}</span>
-                  </motion.button>
-                ))}
-              </motion.div>
-
-              {/* Input Area */}
-              <motion.div
-                className="relative mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                onClick={focusInput}
-              >
-                <div className="rainbow-border-container">
-                  <motion.div
-                    className="rounded-xl bg-[#333] border border-gray-700 overflow-hidden"
-                    whileHover={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
-                    animate={{
-                      boxShadow: [
-                        '0px 0px 0px rgba(0,0,0,0)',
-                        '0px 4px 12px rgba(0,0,0,0.1)',
-                        '0px 0px 0px rgba(0,0,0,0)',
-                      ],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: 'reverse',
-                    }}
-                  >
-                    <textarea
-                      ref={textareaRef}
-                      className="w-full bg-transparent px-4 py-3 outline-none resize-none h-20"
-                      placeholder="Ask anything, create anything"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      onFocus={() => setIsInputFocused(true)}
-                      onBlur={() => setIsInputFocused(false)}
-                    ></textarea>
-                    <div className="flex items-center justify-end px-3 py-2 border-t border-gray-700">
-                      <motion.button
-                        className="p-2 text-gray-400"
-                        whileHover={{ scale: 1.1, color: '#fff' }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <PaperclipIcon className="w-5 h-5" />
-                      </motion.button>
-                      <motion.button
-                        className="p-2 rounded-full bg-blue-500 ml-2"
-                        onClick={() => {
-                          if (inputValue.trim()) {
-                            startChat();
-                            setInputValue('');
-                          }
-                        }}
-                        whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <SendHorizontal className="w-5 h-5 text-white" />
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
-
-              {/* Suggestion */}
-              <motion.div
-                className="flex justify-center mb-8 sm:mb-12"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <motion.button
-                  className="flex items-center gap-2 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-[#333] text-xs sm:text-sm"
-                  onClick={startChat}
-                  whileHover={{
-                    backgroundColor: '#444',
-                    scale: 1.02,
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="text-gray-400">"</span>
-                  <span className="hidden sm:inline">
-                    Create an invoice for my latest client project
-                  </span>
-                  <span className="sm:hidden">
-                    Create an invoice for client
-                  </span>
-                  <span className="text-gray-400">"</span>
-                </motion.button>
-              </motion.div>
-
-              {/* Content Grid */}
-              <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: { opacity: 0 },
-                  visible: {
-                    opacity: 1,
-                    transition: {
-                      staggerChildren: 0.1,
-                      delayChildren: 0.6,
-                    },
-                  },
-                }}
-              >
-                {[
-                  {
-                    src: '/financial-overview-dashboard.png',
-                    alt: 'Financial planning dashboard',
-                    title:
-                      'Business Cash Flow Management: Optimizing Working Capital',
-                  },
-                  {
-                    src: '/tax-documents-organized.png',
-                    alt: 'Tax preparation documents',
-                    title:
-                      'Small Business Tax Strategies: Maximizing Deductions',
-                  },
-                  {
-                    src: '/growth-strategy-overview.png',
-                    alt: 'Investment portfolio analysis',
-                    title:
-                      'Inventory Management: Reducing Costs While Meeting Demand',
-                  },
-                  {
-                    src: '/retirement-planning-abstract.png',
-                    alt: 'Retirement planning calculator',
-                    title:
-                      'Employee Benefits Analysis: Balancing Costs and Retention',
-                  },
-                ].map((card, index) => (
-                  <motion.div
-                    key={index}
-                    className="rounded-xl overflow-hidden border border-gray-800 bg-[#222]"
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                        transition: {
-                          type: 'spring',
-                          stiffness: 300,
-                          damping: 30,
-                        },
-                      },
-                    }}
-                    whileHover={{
-                      y: -8,
-                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
-                    }}
-                    whileTap={{ scale: 0.98, y: -4 }}
-                  >
-                    <div className="relative h-40 sm:h-48">
-                      <Image
-                        src={card.src || '/placeholder.svg'}
-                        alt={card.alt}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <motion.div
-                      className="p-3 sm:p-4"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <h3 className="font-medium text-sm sm:text-base">
-                        {card.title}
-                      </h3>
-                    </motion.div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </motion.main>
-          )}
-        </AnimatePresence>
-      </div>
+      <Sidebar
+        isExpanded={sidebarExpanded}
+        toggleSidebar={toggleSidebar}
+        conversationHistory={conversationHistory}
+        activeConversation={activeConversation}
+        onSelectConversation={selectConversation}
+        onViewAllConversations={viewAllConversations}
+        onGoToHome={goToHome}
+      />
+      <MainContent
+        isChatting={isChatting}
+        showMainChatHistory={showMainChatHistory}
+        activeConversation={activeConversation}
+        conversationHistory={conversationHistory} // Pass full history for history view
+        messages={messages}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+        onSelectConversation={selectConversation} // Pass down for history view interaction
+        onGoToHome={goToHome} // Pass down for history view interaction
+        onStartChat={startChat} // Pass down for home view interaction
+        onSendMessage={handleSendMessage} // Pass down for input interaction
+        onSetIsChatting={setIsChatting} // Pass down for chat header back button
+        // Pass down HomeView data
+        actionButtons={sampleActionButtons}
+        homeCards={sampleHomeCards}
+      />
     </div>
   );
 }
