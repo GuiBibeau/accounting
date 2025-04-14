@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useLogin, useUser } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { AuthLayout } from "@/components/ui/auth-layout";
+import { AuthLayout } from "@/components/auth-layout";
 import { Heading } from "@/components/ui/heading";
 import { Fieldset, FieldGroup, Field, Label, ErrorMessage } from "@/components/ui/fieldset";
 import { Input } from "@/components/ui/input";
