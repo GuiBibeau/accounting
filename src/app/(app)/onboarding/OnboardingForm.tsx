@@ -2,12 +2,17 @@
 
 import React, { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { Fieldset, FieldGroup, Field, Label, ErrorMessage } from '@/components/ui/fieldset';
-import { Heading } from '@/components/ui/heading';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
-import { Text } from '@/components/ui/text';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { OnboardingData, CompanyRole } from '@/lib/company';
+import { ArrowLeft } from 'lucide-react';
 
 const companyRoles: CompanyRole[] = ['solo owner', 'accountant', 'president'];
 
@@ -21,7 +26,8 @@ interface OnboardingFormProps {
   userType: 'freelancer' | 'company';
   isLoading: boolean;
   error: string | null;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSelectChange: (name: string, value: string) => void;
   handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
   onBack: () => void;
 }
@@ -32,133 +38,138 @@ export default function OnboardingForm({
   isLoading,
   error,
   handleChange,
+  handleSelectChange,
   handleSubmit,
   onBack,
 }: OnboardingFormProps) {
+
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
   return (
-    <div className="mx-auto max-w-lg">
-      <div className="flex items-center gap-4 mb-4">
-        <button
+    <div className="mx-auto max-w-lg p-4 md:p-6">
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onBack}
-          className="text-gray-500 hover:text-gray-700 transition-colors"
           disabled={isLoading}
           aria-label="Go back"
+          className="rounded-full"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <Heading level={1}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="scroll-m-20 text-3xl font-semibold tracking-tight">
           {userType === 'freelancer' ? 'Freelancer Information' : 'Company Details'}
-        </Heading>
+        </h1>
       </div>
-      <Text className="mt-2 mb-8">
+      <p className="text-muted-foreground mb-8">
         {userType === 'freelancer'
           ? 'Please provide your details to get started.'
           : 'Please provide your company details to get started.'}
-      </Text>
+      </p>
 
-      <form onSubmit={handleSubmit}>
-        <Fieldset>
-          <FieldGroup>
-            <Field>
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-              />
-            </Field>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid w-full items-center gap-1.5">
+          <Label htmlFor="fullName">Full Name</Label>
+          <Input
+            id="fullName"
+            name="fullName"
+            type="text"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+            disabled={isLoading}
+            placeholder="Your full name"
+          />
+        </div>
 
-            {!formData.isFreelancer && (
-              <Field>
-                <Label htmlFor="companyName">Company Name</Label>
-                <Input
-                  id="companyName"
-                  name="companyName"
-                  type="text"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  required={!formData.isFreelancer}
-                  disabled={isLoading}
-                />
-              </Field>
-            )}
+        {!formData.isFreelancer && (
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="companyName">Company Name</Label>
+            <Input
+              id="companyName"
+              name="companyName"
+              type="text"
+              value={formData.companyName}
+              onChange={handleChange}
+              required={!formData.isFreelancer}
+              disabled={isLoading}
+              placeholder="Your company's name"
+            />
+          </div>
+        )}
 
-            <Field>
-              <Label htmlFor="companyField">
-                {formData.isFreelancer ? 'Industry' : 'Field / Industry'}
-              </Label>
-              <Input
-                id="companyField"
-                name="companyField"
-                type="text"
-                value={formData.companyField}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-                placeholder={formData.isFreelancer
-                  ? 'e.g., Web Development, Design, Consulting'
-                  : 'e.g., Technology, Retail, Consulting'}
-              />
-            </Field>
+        <div className="grid w-full items-center gap-1.5">
+          <Label htmlFor="companyField">
+            {formData.isFreelancer ? 'Industry' : 'Field / Industry'}
+          </Label>
+          <Input
+            id="companyField"
+            name="companyField"
+            type="text"
+            value={formData.companyField}
+            onChange={handleChange}
+            required
+            disabled={isLoading}
+            placeholder={formData.isFreelancer
+              ? 'e.g., Web Development, Design, Consulting'
+              : 'e.g., Technology, Retail, Consulting'}
+          />
+        </div>
 
-            {!formData.isFreelancer && (
-              <Field>
-                <Label htmlFor="companySize">Company Size</Label>
-                <Input
-                  id="companySize"
-                  name="companySize"
-                  type="text"
-                  value={formData.companySize}
-                  onChange={handleChange}
-                  required={!formData.isFreelancer}
-                  disabled={isLoading}
-                  placeholder="e.g., 1-10 employees, 50+, etc."
-                />
-              </Field>
-            )}
+        {!formData.isFreelancer && (
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="companySize">Company Size</Label>
+            <Input
+              id="companySize"
+              name="companySize"
+              type="text"
+              value={formData.companySize}
+              onChange={handleChange}
+              required={!formData.isFreelancer}
+              disabled={isLoading}
+              placeholder="e.g., 1-10 employees, 50+, etc."
+            />
+          </div>
+        )}
 
-            {!formData.isFreelancer && (
-              <Field>
-                <Label htmlFor="role">Your Role</Label>
-                <Select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required={!formData.isFreelancer}
-                  disabled={isLoading}
-                >
-                  {companyRoles.map((role) => (
-                    <option key={role} value={role}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            )}
+        {!formData.isFreelancer && (
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="role">Your Role</Label>
+            <Select
+              name="role"
+              value={formData.role}
+              onValueChange={(value) => handleSelectChange('role', value)}
+              required={!formData.isFreelancer}
+              disabled={isLoading}
+            >
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Select your role" />
+              </SelectTrigger>
+              <SelectContent>
+                {companyRoles.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {capitalize(role)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
-            {error && (
-              <ErrorMessage>{error}</ErrorMessage>
-            )}
+        {error && (
+          <p className="text-sm font-medium text-destructive">{error}</p>
+        )}
 
-            <div className="mt-8">
-              <Button
-                type="submit"
-                color="indigo"
-                disabled={isLoading}
-                className="w-full"
-              >
-                {isLoading ? 'Saving...' : 'Complete Setup'}
-              </Button>
-            </div>
-          </FieldGroup>
-        </Fieldset>
+        <div className="pt-4">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? 'Saving...' : 'Complete Setup'}
+          </Button>
+        </div>
       </form>
     </div>
   );

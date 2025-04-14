@@ -1,117 +1,156 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useSignup, useUser } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { AuthLayout } from "@/components/auth-layout";
-import { Divider } from "@/components/ui/divider"; // Assuming Divider component exists
-import { Heading } from "@/components/ui/heading";
-import { Fieldset, FieldGroup, Field, Label, ErrorMessage } from "@/components/ui/fieldset";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Text, TextLink } from "@/components/ui/text";
-import { FcGoogle } from 'react-icons/fc'; // Import Google icon from react-icons
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { FcGoogle } from 'react-icons/fc';
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+});
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  // Destructure signupWithGoogle from the updated hook
   const { signupWithEmail, signupWithGoogle, signupError, clearSignupError } = useSignup();
   const { user, loading } = useUser();
   const router = useRouter();
 
-  const handleEmailSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleEmailSignup = async (values: z.infer<typeof formSchema>) => {
     clearSignupError();
-    await signupWithEmail(email, password);
-    // Check for error *after* the attempt.
+    await signupWithEmail(values.email, values.password);
     if (!signupError) {
-      router.push("/"); // Redirect to home page after signup
+      router.push("/");
+    } else {
+      form.setError("root", { type: "manual", message: signupError.message });
     }
   };
 
-  // Handler for Google Sign-Up
   const handleGoogleSignup = async () => {
     clearSignupError();
     await signupWithGoogle();
-    // Check for error *after* the attempt.
-    // The onAuthStateChanged listener in AuthContext handles the redirect
-    // No explicit redirect needed here if the listener works correctly
-    // However, we might want to add a check similar to email signup just in case
-    // For now, rely on the listener.
+    if (!signupError) {
+      router.push("/");
+    } else {
+      form.setError("root", { type: "manual", message: `Google signup failed: ${signupError.message}` });
+    }
   };
 
-  // Redirect if user is already logged in and not loading
   React.useEffect(() => {
     if (!loading && user) {
       router.push("/");
     }
   }, [user, loading, router]);
 
-  // Don't render the form if loading or already logged in
-  if (loading || user) {
-    // TODO: Replace with a proper loading spinner component if available
+  if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
+  if (user) return null;
+
   return (
     <AuthLayout>
-      <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <Heading>Sign Up</Heading>
-        <Fieldset className="w-full">
-          <form onSubmit={handleEmailSignup}>
-            <FieldGroup>
-              <Field>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
-              </Field>
-              <Field>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6} // Basic Firebase password requirement
-                  autoComplete="new-password" // Use new-password for signup
-                />
-              </Field>
-              {signupError && (
-                <ErrorMessage>{signupError.message}</ErrorMessage>
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
+          <CardDescription>
+            Enter your information to create an account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleEmailSignup)} className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="m@example.com"
+                        required
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        required
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {form.formState.errors.root && (
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.root.message}
+                </p>
               )}
-              <Button type="submit" color="indigo" className="w-full">
-                Sign Up with Email
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Signing Up..." : "Sign Up with Email"}
               </Button>
-            </FieldGroup>
-          </form>
-        </Fieldset>
-
-        <Divider />
-
-        {/* Google Sign Up Button */}
-        <Button
-          outline // Use the outline prop for secondary styling
-          className="w-full flex items-center justify-center gap-2" // Added flex layout
-          onClick={handleGoogleSignup}
-        >
-          <FcGoogle className="h-5 w-5" /> {/* Use FcGoogle icon */}
-          Sign Up with Google
-        </Button>
-
-        <Text>
-          Already have an account? <TextLink href="/login">Log in</TextLink>
-        </Text>
-      </div>
+            </form>
+          </Form>
+          <Separator className="my-4" />
+          <Button variant="outline" onClick={handleGoogleSignup} className="w-full flex items-center justify-center gap-2" disabled={form.formState.isSubmitting}>
+            <FcGoogle className="h-5 w-5" />
+            Sign Up with Google
+          </Button>
+        </CardContent>
+        <CardFooter className="text-center text-sm">
+          Already have an account?{' '}
+          <Link href="/login" className="underline">
+            Log in
+          </Link>
+        </CardFooter>
+      </Card>
     </AuthLayout>
   );
 }

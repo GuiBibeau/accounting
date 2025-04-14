@@ -29,6 +29,10 @@ export default function OnboardingClient() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleTypeSelect = (type: 'freelancer' | 'company') => {
     setUserType(type);
     setFormData(prev => ({
@@ -83,6 +87,7 @@ export default function OnboardingClient() {
           isLoading={isLoading}
           error={error}
           handleChange={handleChange}
+          handleSelectChange={handleSelectChange}
           handleSubmit={handleSubmit}
           onBack={() => setStep('type')}
         />

@@ -2,8 +2,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Text } from '@/components/ui/text';
 
 interface TypeSelectionProps {
   onSelectType: (type: 'freelancer' | 'company') => void;
@@ -11,27 +9,29 @@ interface TypeSelectionProps {
 
 export default function TypeSelection({ onSelectType }: TypeSelectionProps) {
   return (
-    <div className="mx-auto max-w-lg">
-      <Heading level={1}>Get Started</Heading>
-      <Text className="mt-2 mb-8">
+    <div className="mx-auto max-w-lg p-4 md:p-6 text-center">
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-4">
+        Get Started
+      </h1>
+      <p className="text-xl text-muted-foreground mb-8">
         Are you a freelancer or registering a company?
-      </Text>
+      </p>
 
       <div className="space-y-4">
         <div className="w-full">
           <Button
             onClick={() => onSelectType('freelancer')}
-            color="indigo"
             className="w-full"
+            size="lg"
           >
-            I&apos;m a Freelancer
+            I'm a Freelancer
           </Button>
         </div>
         <div className="w-full">
           <Button
             onClick={() => onSelectType('company')}
-            color="indigo"
             className="w-full"
+            size="lg"
           >
             I have a Company
           </Button>

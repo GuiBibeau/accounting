@@ -1,83 +1,103 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useUser, useLogout } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Shadcn Avatar (Removed AvatarImage)
+import { Button, buttonVariants } from "@/components/ui/button"; // Shadcn Button
 import {
-  Navbar,
-  NavbarItem,
-  NavbarLabel,
-  NavbarSection,
-  NavbarSpacer,
-} from "@/components/ui/navbar";
-// Removed unused Button import
-import { AvatarButton } from "@/components/ui/avatar";
-import {
-  Dropdown,
-  DropdownButton,
   DropdownMenu,
-  DropdownItem,
-  DropdownLabel,
-  DropdownDivider,
-} from "@/components/ui/dropdown";
-// Removed unused Link import
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"; // Shadcn DropdownMenu
 
 export default function AuthHeader() {
   const { user, loading } = useUser();
-  const { logout, logoutError } = useLogout(); // Keep logoutError for potential future use
+  const { logout, logoutError } = useLogout();
 
   const handleLogout = async () => {
     await logout();
-    // Optional: Add redirect logic here if needed, though context handles user state
     if (logoutError) {
-      console.error("Logout Error:", logoutError.message); // Log error for now
+      console.error("Logout Error:", logoutError.message);
     }
   };
 
-  // Simple loading state
-  if (loading) {
-    return (
-      <Navbar>
-        <NavbarSection>
-          <NavbarItem>
-            <NavbarLabel>Loading...</NavbarLabel>
-          </NavbarItem>
-        </NavbarSection>
-      </Navbar>
-    );
-  }
-
-  // Extract initials for Avatar
+  // Function to get initials from email
   const getInitials = (email?: string | null) => {
-    return email ? email.substring(0, 2).toUpperCase() : '??';
+    if (!email) return '??';
+    const parts = email.split('@')[0];
+    return parts.substring(0, 2).toUpperCase();
   };
 
   return (
-    <Navbar>
-      <NavbarItem href="/">
-        <NavbarLabel>AI Accountant</NavbarLabel> {/* Updated App Name */}
-      </NavbarItem>
-      <NavbarSpacer />
-      <NavbarSection>
-        {user ? (
-          <Dropdown>
-            <DropdownButton as={AvatarButton} initials={getInitials(user.email)} className="size-8" />
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="container flex h-14 max-w-screen-2xl items-center">
+        {/* App Name/Logo */}
+        <Link href="/" className="mr-6 flex items-center space-x-2">
+          {/* <Icons.logo className="h-6 w-6" /> Optional Logo */}
+          <span className="font-bold">AI Accountant</span>
+        </Link>
+
+        {/* Spacer */}
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          {/* Loading State */}
+          {loading && (
+            <span className="text-sm text-muted-foreground">Loading...</span>
+          )}
+
+          {/* User Dropdown or Login/Signup Links */}
+          {!loading && user ? (
             <DropdownMenu>
-              <DropdownItem disabled>
-                <DropdownLabel>{user.email}</DropdownLabel>
-              </DropdownItem>
-              <DropdownDivider />
-              <DropdownItem onClick={handleLogout}>
-                 Logout
-              </DropdownItem>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
+                  <Avatar className="h-8 w-8">
+                    {/* Optional: Add AvatarImage if user has profile picture URL */}
+                    {/* <AvatarImage src={user.photoURL || undefined} alt={user.email || 'User'} /> */}
+                    <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">Account</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {/* Add other items like Settings, Profile etc. if needed */}
+                {/* <DropdownMenuItem>Profile</DropdownMenuItem> */}
+                <DropdownMenuItem onClick={handleLogout}>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
             </DropdownMenu>
-          </Dropdown>
-         ) : (
-           <>
-             <NavbarItem href="/login">Login</NavbarItem>
-             <NavbarItem href="/signup">Sign Up</NavbarItem>
-           </>
-         )}
-      </NavbarSection>
-    </Navbar>
+          ) : !loading && !user ? (
+            <>
+              <Link
+                href="/login"
+                className={buttonVariants({ variant: "ghost" })}
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className={buttonVariants({ variant: "default" })} // Or "ghost" or other variant
+              >
+                Sign Up
+              </Link>
+            </>
+          ) : null /* Handles the case where loading is false but user state is indeterminate */}
+        </div>
+      </nav>
+    </header>
   );
 }

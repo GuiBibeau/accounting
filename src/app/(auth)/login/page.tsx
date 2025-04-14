@@ -1,106 +1,156 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useLogin, useUser } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { AuthLayout } from "@/components/auth-layout";
-import { Heading } from "@/components/ui/heading";
-import { Fieldset, FieldGroup, Field, Label, ErrorMessage } from "@/components/ui/fieldset";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Text, TextLink } from "@/components/ui/text";
-import { Divider } from "@/components/ui/divider"; // Import Divider
-import { FcGoogle } from 'react-icons/fc'; // Import Google icon from react-icons
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { FcGoogle } from 'react-icons/fc';
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+});
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const { loginWithEmail, loginWithGoogle, loginError, clearLoginError } = useLogin();
   const { user, loading } = useUser();
   const router = useRouter();
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleEmailLogin = async (values: z.infer<typeof formSchema>) => {
     clearLoginError();
-    await loginWithEmail(email, password);
-    // Check for error *after* the attempt. Assumes loginError state updates.
-    // A more robust check might involve checking the user state directly after a short delay or via useEffect.
+    await loginWithEmail(values.email, values.password);
     if (!loginError) {
-      router.push("/"); // Redirect to home page after login
+      router.push("/");
+    } else {
+      form.setError("root", { type: "manual", message: loginError.message });
     }
   };
 
   const handleGoogleLogin = async () => {
     clearLoginError();
     await loginWithGoogle();
-    // Check for error *after* the attempt.
     if (!loginError) {
       router.push("/");
+    } else {
+      form.setError("root", { type: "manual", message: `Google login failed: ${loginError.message}` });
     }
   };
 
-  // Redirect if user is already logged in and not loading
   React.useEffect(() => {
     if (!loading && user) {
       router.push("/");
     }
   }, [user, loading, router]);
 
-  // Don't render the form if loading or already logged in
-  if (loading || user) {
-    // TODO: Replace with a proper loading spinner component if available
+  if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
+  if (user) return null;
+
   return (
     <AuthLayout>
-      <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <Heading>Login</Heading>
-        <Fieldset className="w-full">
-          <form onSubmit={handleEmailLogin}>
-            <FieldGroup>
-              <Field>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  type="email"
-                  id="email"
-                  name="email" // Add name attribute for accessibility/forms
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email" // Add autocomplete
-                />
-              </Field>
-              <Field>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  id="password"
-                  name="password" // Add name attribute
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password" // Add autocomplete
-                />
-              </Field>
-              {loginError && <ErrorMessage>{loginError.message}</ErrorMessage>}
-              <Button type="submit" color="indigo" className="w-full">
-                Sign In with Email
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleEmailLogin)} className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="m@example.com"
+                        required
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        required
+                        autoComplete="current-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               {form.formState.errors.root && (
+                 <p className="text-sm font-medium text-destructive">
+                   {form.formState.errors.root.message}
+                 </p>
+               )}
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Signing In..." : "Sign In with Email"}
               </Button>
-            </FieldGroup>
-          </form>
-          <Divider className="my-6" /> {/* Add a divider */}
-          <Button outline onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2">
-            <FcGoogle className="h-5 w-5" /> {/* Use FcGoogle icon */}
+            </form>
+          </Form>
+          <Separator className="my-4" />
+          <Button variant="outline" onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2" disabled={form.formState.isSubmitting}>
+            <FcGoogle className="h-5 w-5" />
             Sign In with Google
           </Button>
-        </Fieldset>
-
-        <Text>
-          Don&apos;t have an account?{' '}
-          <TextLink href="/signup">Sign up</TextLink>
-        </Text>
-      </div>
+        </CardContent>
+        <CardFooter className="text-center text-sm">
+          Don't have an account?{' '}
+          <Link href="/signup" className="underline">
+            Sign up
+          </Link>
+        </CardFooter>
+      </Card>
     </AuthLayout>
   );
 }
