@@ -15,9 +15,11 @@ export type CompanyRole = 'solo owner' | 'accountant' | 'president';
 export interface OnboardingData {
   fullName: string;
   role: CompanyRole;
-  companySize: string;
-  companyName: string;
-  companyField: string;
+  companySize?: string;
+  companyName?: string;
+  companyField?: string;
+  isFreelancer: boolean;
+  freelancerIndustry?: string;
 }
 
 export interface Company {
@@ -25,6 +27,8 @@ export interface Company {
   name: string;
   size: string;
   field: string;
+  isFreelancer: boolean;
+  freelancerName?: string;
   createdAt: Timestamp;
   createdBy: string;
 }
@@ -63,6 +67,7 @@ export const createCompany = async (
     name: data.companyName,
     size: data.companySize,
     field: data.companyField,
+    isFreelancer: false,
     createdAt: now as Timestamp,
     createdBy: creatorId,
   };
@@ -94,8 +99,11 @@ export const handleOnboarding = async (
   if (!user.uid || !user.email) {
     throw new Error('User UID and email are required for onboarding.');
   }
-  if (!data.companyName || !data.companySize || !data.companyField || !data.role || !data.fullName) {
-    throw new Error('All onboarding fields are required.');
+  if (!data.fullName || !data.role) {
+    throw new Error('Name and role are required.');
+  }
+  if (!data.isFreelancer && (!data.companyName || !data.companySize || !data.companyField)) {
+    throw new Error('Company details are required for non-freelancers.');
   }
 
   const batch = writeBatch(db);
@@ -107,9 +115,11 @@ export const handleOnboarding = async (
 
   const newCompanyData: Company = {
     companyId: companyId,
-    name: data.companyName,
-    size: data.companySize,
-    field: data.companyField,
+    name: data.isFreelancer ? `Freelancer: ${data.fullName}` : data.companyName!,
+    size: data.isFreelancer ? '1 (Freelancer)' : data.companySize!,
+    field: data.isFreelancer ? data.freelancerIndustry || 'Freelance' : data.companyField!,
+    isFreelancer: data.isFreelancer,
+    freelancerName: data.isFreelancer ? data.fullName : undefined,
     createdAt: now as Timestamp,
     createdBy: user.uid,
   };
