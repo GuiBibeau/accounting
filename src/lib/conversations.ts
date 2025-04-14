@@ -8,6 +8,7 @@ import {
   onSnapshot,
   doc,
   getDoc,
+  getDocs,
   Timestamp,
   Unsubscribe,
   writeBatch,
@@ -166,5 +167,49 @@ export const getConversation = async (
   } catch (error) {
     console.error('Error fetching conversation:', error);
     return null;
+  }
+};
+
+/**
+ * Fetches all conversations for a given user as a one-time operation.
+ *
+ * @param userId The ID of the user whose conversations to fetch.
+ * @returns A promise that resolves with an array of Conversation objects.
+ */
+export const getAllUserConversations = async (
+  userId: string
+): Promise<Conversation[]> => {
+  if (!userId) {
+    console.error('getAllUserConversations: userId is required.');
+    return [];
+  }
+
+  try {
+    const conversationsCol = collection(db, 'conversations');
+    const q = query(
+      conversationsCol,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    const conversationsData = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      const displayDate = data.createdAt?.toDate().toLocaleDateString() ?? '';
+      return {
+        id: doc.id,
+        userId: data.userId,
+        title: data.title ?? 'Untitled Conversation',
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        date: displayDate,
+      } as Conversation;
+    });
+
+    return conversationsData;
+  } catch (error) {
+    console.error('Error fetching all conversations:', error);
+    return [];
   }
 };
