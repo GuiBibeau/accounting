@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { getMessages, saveMessage } from '@/lib/messages';
 import { useChat, type Message } from '@ai-sdk/react';
@@ -14,10 +14,16 @@ export default function ChatPage() {
     saveMessage(conversationId as string, message);
   };
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const { handleSubmit, status, messages, input, handleInputChange, setInput, setMessages } =
     useChat({
       onFinish,
     });
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -141,6 +147,7 @@ export default function ChatPage() {
             )}
           </motion.div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-4 border-t border-gray-800">
