@@ -51,7 +51,7 @@ export default function SignupPage() {
     clearSignupError();
     await signupWithEmail(values.email, values.password);
     if (!signupError) {
-      router.push("/");
+      router.push("/chat");
     } else {
       form.setError("root", { type: "manual", message: signupError.message });
     }
@@ -61,7 +61,7 @@ export default function SignupPage() {
     clearSignupError();
     await signupWithGoogle();
     if (!signupError) {
-      router.push("/");
+      router.push("/chat");
     } else {
       form.setError("root", { type: "manual", message: `Google signup failed: ${signupError.message}` });
     }
@@ -69,7 +69,7 @@ export default function SignupPage() {
 
   React.useEffect(() => {
     if (!loading && user) {
-      router.push("/");
+      router.push("/chat");
     }
   }, [user, loading, router]);
 

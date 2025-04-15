@@ -51,7 +51,7 @@ export default function LoginPage() {
     clearLoginError();
     await loginWithEmail(values.email, values.password);
     if (!loginError) {
-      router.push("/");
+      router.push("/chat");
     } else {
       form.setError("root", { type: "manual", message: loginError.message });
     }
@@ -61,7 +61,7 @@ export default function LoginPage() {
     clearLoginError();
     await loginWithGoogle();
     if (!loginError) {
-      router.push("/");
+      router.push("/chat");
     } else {
       form.setError("root", { type: "manual", message: `Google login failed: ${loginError.message}` });
     }
@@ -69,7 +69,7 @@ export default function LoginPage() {
 
   React.useEffect(() => {
     if (!loading && user) {
-      router.push("/");
+      router.push("/chat");
     }
   }, [user, loading, router]);
 
@@ -145,7 +145,7 @@ export default function LoginPage() {
           </Button>
         </CardContent>
         <CardFooter className="text-center text-sm">
-          Don't have an account?{' '}
+          Don&#39;t have an account?{' '}
           <Link href="/signup" className="underline">
             Sign up
           </Link>

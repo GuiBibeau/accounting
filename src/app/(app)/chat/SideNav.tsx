@@ -94,7 +94,6 @@ export const SideNav = () => {
   };
 
   const viewAllConversations = () => {};
-  const goToHome = () => {};
   return (
     <motion.div
       className="border-r border-gray-800 flex flex-col relative"
@@ -230,8 +229,8 @@ export const SideNav = () => {
               variants={fadeIn}
               className="flex flex-col items-center pt-4 space-y-6"
             >
+              <Link href="/chat" passHref>
               <motion.button
-                onClick={goToHome}
                 className="p-2 rounded-md hover:bg-white/5"
                 aria-label="Home"
                 whileHover={{
@@ -242,18 +241,20 @@ export const SideNav = () => {
               >
                 <HomeIcon className="w-5 h-5" />
               </motion.button>
-              <motion.button
-                onClick={viewAllConversations}
-                className="p-2 rounded-md hover:bg-white/5"
-                aria-label="View chat history"
-                whileHover={{
-                  scale: 1.1,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <History className="w-5 h-5" />
-              </motion.button>
+              </Link>
+              <Link href="/chat/history" passHref>
+                <motion.button
+                  className="p-2 rounded-md hover:bg-white/5"
+                  aria-label="View chat history"
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <History className="w-5 h-5" />
+                </motion.button>
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>
