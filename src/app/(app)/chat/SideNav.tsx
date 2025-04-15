@@ -76,6 +76,22 @@ export const SideNav = () => {
   const [conversationHistory, setConversationHistory] = useState<
     Conversation[]
   >([]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setSidebarExpanded(!e.matches);
+    };
+
+    setSidebarExpanded(!mediaQuery.matches);
+
+    mediaQuery.addEventListener('change', handleMediaChange);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleMediaChange);
+    };
+  }, []);
   const { user } = useAuth();
   const { logout } = useLogout();
 

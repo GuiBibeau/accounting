@@ -58,17 +58,18 @@ export default function ChatPage() {
   return (
     <>
       <div className="flex-1 overflow-y-auto p-4 relative">
-        {messages.map((message, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.25, duration: 0.6 }} // Slower duration and adjusted delay
-            className={`mb-6 ${message.role === 'user' ? 'flex justify-end' : ''}`}
-          >
+        <div className="max-w-4xl mx-auto">
+          {messages.map((message, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.25, duration: 0.6 }} // Slower duration and adjusted delay
+              className="mb-6 flex"
+            >
             {message.role === 'user' ? (
               <motion.div
-                className="bg-white/10 rounded-full px-4 py-1.5 max-w-[80%]"
+                className="bg-white/10 rounded-full px-4 py-1.5 max-w-[90%] md:max-w-[80%] lg:max-w-[70%]"
                 whileHover={{
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 }}
@@ -76,7 +77,7 @@ export default function ChatPage() {
                 {message.content}
               </motion.div>
             ) : (
-              <div className="max-w-[80%]">
+              <div className="max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">
                 <div className="text-white">
                   {message.content
                     .split('\n\n')
@@ -145,9 +146,10 @@ export default function ChatPage() {
                 </motion.div>
               </div>
             )}
-          </motion.div>
-        ))}
-        <div ref={messagesEndRef} />
+            </motion.div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       <div className="p-4 border-t border-gray-800">
