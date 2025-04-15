@@ -77,10 +77,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log("AuthProvider: Needs onboarding, redirecting to /onboarding.");
             router.push('/onboarding');
           } else if (onboardingStatus === false && isOnboardingPage) {
-            console.log("AuthProvider: Onboarding complete/not needed, redirecting from onboarding to /dashboard.");
-            router.push('/dashboard');
+            console.log("AuthProvider: Onboarding complete/not needed, redirecting from onboarding to /chat.");
+            router.push('/chat');
           } else if (isAuthPage) {
-            const destination = onboardingStatus === true ? '/onboarding' : '/dashboard';
+            const destination = onboardingStatus === true ? '/onboarding' : '/chat';
             console.log(`AuthProvider: User logged in on auth page, redirecting to ${destination}.`);
             router.push(destination);
           }

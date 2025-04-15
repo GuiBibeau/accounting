@@ -68,7 +68,7 @@ export default function OnboardingClient() {
         role: formData.role as CompanyRole,
       };
       await handleOnboarding(user, onboardingPayload);
-      router.push('/dashboard');
+      router.push('/chat');
     } catch (err) {
       console.error("Onboarding failed:", err);
       setError(err instanceof Error ? err.message : "An unexpected error occurred during onboarding.");
