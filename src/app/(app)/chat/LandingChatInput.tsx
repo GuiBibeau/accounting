@@ -17,13 +17,11 @@ export const LandingChatInput: React.FC = () => {
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
         e.preventDefault();
-        // Call createConversation without conversationRef, get ID directly
         const conversationId = await createConversation({
           userId: user?.uid as string,
           message: inputValue,
         });
 
-        // Use the returned ID for navigation
         router.push(`/chat/${conversationId}`);
     }
     };

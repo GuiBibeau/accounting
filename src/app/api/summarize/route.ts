@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     // Generate the summary using Groq
     const { text: title } = await generateText({
       model: groq(groqSummarizationModelId),
-      prompt: `The user is asking a question to a business agent that does accounting, tax, and bookkeeping. Summarize the question in 7 words or less. The summary will be used as the title of the conversation. Return only the summary of the question. No quotes or other text: ${message},`,
+      prompt: `Summarize the following conversation in 7 words or less: ${message},`,
     });
 
     return NextResponse.json({ title });

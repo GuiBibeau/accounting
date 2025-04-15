@@ -2,30 +2,52 @@
 
 import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { getMessages, Message } from '@/lib/messages';
+import { getMessages, saveMessage } from '@/lib/messages';
+import { useChat, type Message } from '@ai-sdk/react';
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [, setIsLoading] = useState(true);
   const { id: conversationId } = useParams();
+
+  const onFinish = (message: Message) => {
+    saveMessage(conversationId as string, message);
+  };
+
+  const { handleSubmit, status, messages, input, handleInputChange, setInput, setMessages } =
+    useChat({
+      onFinish,
+    });
 
   useEffect(() => {
     if (!conversationId) return;
-
-    setIsLoading(true);
     const unsubscribe = getMessages(
       conversationId as string,
-      (fetchedMessages) => {
-        setMessages(fetchedMessages);
-        setIsLoading(false);
-
+      (firebaseMessages) => {
+        // this will send the first message to the chat endpoint and then update the messages state
+        if (
+          firebaseMessages.length === 1 &&
+          status === 'ready' &&
+          messages.length === 0
+        ) {
+          setInput(firebaseMessages[0].content);
+          handleSubmit();
+        } else if (firebaseMessages.length > 1) {
+          setMessages(firebaseMessages);
+        }
       }
     );
-
     return () => unsubscribe();
-  }, [conversationId]);
+  }, [conversationId, handleSubmit, setInput, status, messages]);
+
+  const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSubmit(e);
+    saveMessage(conversationId as string, {
+      role: 'user',
+      content: input,
+    });
+  };
 
   return (
     <>
@@ -50,44 +72,52 @@ export default function ChatPage() {
             ) : (
               <div className="max-w-[80%]">
                 <div className="text-white">
-                  {message.content.split('\n\n').map((paragraph, i) => {
-                    if (paragraph.includes('* ')) {
-                      const items = paragraph.split('* ').filter(Boolean);
+                  {message.content
+                    .split('\n\n')
+                    .map((paragraph: string, i: number) => {
+                      // Added types
+                      if (paragraph.includes('* ')) {
+                        const items = paragraph.split('* ').filter(Boolean);
+                        return (
+                          <motion.div
+                            key={i}
+                            className="mb-4"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.3 + i * 0.1 }}
+                          >
+                            <ul className="list-disc pl-5 space-y-1">
+                              {items.map(
+                                (
+                                  item: string,
+                                  j: number // Added types
+                                ) => (
+                                  <motion.li
+                                    key={j}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.4 + j * 0.05 }}
+                                  >
+                                    {item}
+                                  </motion.li>
+                                )
+                              )}
+                            </ul>
+                          </motion.div>
+                        );
+                      }
                       return (
-                        <motion.div
+                        <motion.p
                           key={i}
                           className="mb-4"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 + i * 0.1 }}
                         >
-                          <ul className="list-disc pl-5 space-y-1">
-                            {items.map((item, j) => (
-                              <motion.li
-                                key={j}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.4 + j * 0.05 }}
-                              >
-                                {item}
-                              </motion.li>
-                            ))}
-                          </ul>
-                        </motion.div>
+                          {paragraph}
+                        </motion.p>
                       );
-                    }
-                    return (
-                      <motion.p
-                        key={i}
-                        className="mb-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 + i * 0.1 }}
-                      >
-                        {paragraph}
-                      </motion.p>
-                    );
-                  })}
+                    })}
                 </div>
                 <motion.div
                   className="flex items-center mt-1"
@@ -120,10 +150,15 @@ export default function ChatPage() {
             whileFocus={{ borderColor: 'rgba(255, 255, 255, 0.3)' }}
             whileHover={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
           >
-            <textarea
-              className="w-full bg-transparent px-4 py-3 outline-none resize-none h-12"
-              placeholder="Ask anything, create anything"
-            />
+            <form onSubmit={handleSubmitMessage}>
+              <input
+                value={input}
+                onChange={handleInputChange}
+                className="w-full bg-transparent px-4 py-3 outline-none resize-none h-12"
+                placeholder="Ask anything, create anything"
+              />
+            </form>
+
             <div className="absolute right-2 bottom-2 flex items-center">
               <motion.button
                 className="p-2 text-gray-400"
@@ -133,6 +168,7 @@ export default function ChatPage() {
                 <PaperclipIcon className="w-5 h-5" />
               </motion.button>
               <motion.button
+                type="submit"
                 className="p-2 rounded-full bg-blue-500 ml-2"
                 whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
                 whileTap={{ scale: 0.9 }}
