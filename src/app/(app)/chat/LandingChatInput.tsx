@@ -1,4 +1,3 @@
-// Removed unused imports: DocumentData, DocumentReference
 import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 import { useRef, useState } from 'react';
@@ -6,25 +5,23 @@ import { createConversation } from '@/lib/conversations';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Removed Props type and component prop
 export const LandingChatInput: React.FC = () => {
   const textareaRef = useRef(null);
   const { user } = useAuth();
   const [inputValue, setInputValue] = useState('');
   const router = useRouter();
-  
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
-        e.preventDefault();
-        const conversationId = await createConversation({
-          userId: user?.uid as string,
-          message: inputValue,
-        });
+    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
+      e.preventDefault();
+      const conversationId = await createConversation({
+        userId: user?.uid as string,
+        message: inputValue,
+      });
 
-        router.push(`/chat/${conversationId}`);
+      router.push(`/chat/${conversationId}`);
     }
-    };
+  };
 
   return (
     <motion.div
