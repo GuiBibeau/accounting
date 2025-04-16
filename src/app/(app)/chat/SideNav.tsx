@@ -112,12 +112,12 @@ export const SideNav = () => {
   const viewAllConversations = () => {};
   return (
     <motion.div
-      className="border-r border-gray-800 flex flex-col relative"
+      className="border-r border-border flex flex-col relative bg-background"
       initial={sidebarExpanded ? 'expanded' : 'collapsed'}
       animate={sidebarExpanded ? 'expanded' : 'collapsed'}
       variants={sidebarVariants}
     >
-      <div className="p-4 flex items-center justify-center gap-2 border-b border-gray-800">
+      <div className="p-4 flex items-center justify-center gap-2 border-b border-border">
         <AnimatePresence mode="wait">
           {sidebarExpanded ? (
             <motion.span
@@ -147,7 +147,7 @@ export const SideNav = () => {
 
       {/* Toggle Button */}
       <motion.button
-        className="absolute -right-3 top-14 transform bg-gray-800 rounded-full p-1 border border-gray-700 z-10 hover:bg-gray-700 transition-colors"
+        className="absolute -right-3 top-14 transform bg-accent rounded-full p-1 border border-border z-10 hover:bg-accent/80 transition-colors"
         onClick={toggleSidebar}
         aria-label={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         whileHover={{ scale: 1.1 }}
@@ -191,7 +191,7 @@ export const SideNav = () => {
               className="space-y-4"
             >
               <div className="px-4">
-                <h2 className="font-medium text-sm text-gray-400">
+                <h2 className="font-medium text-sm text-muted-foreground">
                   Recent Conversations
                 </h2>
               </div>
@@ -206,7 +206,7 @@ export const SideNav = () => {
                     animate="visible"
                     whileHover={{
                       x: 4,
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      backgroundColor: 'hsl(var(--accent))',
                     }}
                     whileTap={{ scale: 0.98 }}
                     className={`w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm rounded-md ${
@@ -228,7 +228,7 @@ export const SideNav = () => {
                     whileHover={{ x: 4, color: '#fff' }}
                     whileTap={{ scale: 0.98 }}
                     onClick={viewAllConversations}
-                    className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-gray-400 rounded-md"
+                    className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-muted-foreground rounded-md"
                   >
                     <span>View all conversations...</span>
                   </motion.button>
@@ -251,7 +251,7 @@ export const SideNav = () => {
                 aria-label="Home"
                 whileHover={{
                   scale: 1.1,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: 'hsl(var(--accent))',
                 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -262,10 +262,10 @@ export const SideNav = () => {
                 <motion.button
                   className="p-2 rounded-md hover:bg-white/5"
                   aria-label="View chat history"
-                  whileHover={{
-                    scale: 1.1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  }}
+                whileHover={{
+                  scale: 1.1,
+                  backgroundColor: 'hsl(var(--accent))',
+                }}
                   whileTap={{ scale: 0.9 }}
                 >
                   <History className="w-5 h-5" />
@@ -277,7 +277,7 @@ export const SideNav = () => {
       </div>
 
       {/* Me Button / Account Dialog */}
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-border">
         <Dialog>
           <DialogTrigger asChild>
             <Button
