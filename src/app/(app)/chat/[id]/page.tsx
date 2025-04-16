@@ -2,12 +2,15 @@
 
 import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { getMessages, saveMessage } from '@/lib/messages';
 import { useChat, type Message } from '@ai-sdk/react';
+import { useUser } from '@/contexts/AuthContext';
 
 export default function ChatPage() {
+  const { user } = useUser();
   const { id: conversationId } = useParams();
 
   const onFinish = (message: Message) => {
@@ -44,7 +47,7 @@ export default function ChatPage() {
       }
     );
     return () => unsubscribe();
-  }, [conversationId, handleSubmit, setInput, status, messages]);
+  }, [conversationId, handleSubmit, setInput, status, messages, setMessages]);
 
   const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,12 +72,18 @@ export default function ChatPage() {
             >
               {message.role === 'user' ? (
                 <motion.div
-                  className="bg-white/10 rounded-full px-4 py-1.5 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full "
+                  className="flex items-center gap-3 bg-white/10 rounded-full px-4 py-3 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full"
                   whileHover={{
                     backgroundColor: 'rgba(255, 255, 255, 0.15)',
                   }}
                 >
-                  {message.content}
+                  <Avatar className="h-8 w-8 bg-blue-500 dark:bg-blue-600 text-white">
+                    <AvatarImage src="/user-avatar.png" />
+                    <AvatarFallback className="bg-blue-500 dark:bg-blue-600 text-white">
+                      {user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>{message.content}</div>
                 </motion.div>
               ) : (
                 <div className="max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">
