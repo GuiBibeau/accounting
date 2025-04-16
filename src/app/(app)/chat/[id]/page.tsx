@@ -65,11 +65,11 @@ export default function ChatPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.25, duration: 0.6 }} // Slower duration and adjusted delay
-              className="mb-6 flex"
+              className="mb-6 flex justify-center"
             >
             {message.role === 'user' ? (
               <motion.div
-                className="bg-white/10 rounded-full px-4 py-1.5 max-w-[90%] md:max-w-[80%] lg:max-w-[70%]"
+                className="bg-white/10 rounded-full px-4 py-1.5 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full "
                 whileHover={{
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 }}
