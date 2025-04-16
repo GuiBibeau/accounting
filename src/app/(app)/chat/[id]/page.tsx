@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { PaperclipIcon, SendHorizontal } from 'lucide-react';
+import { PulseDot } from '@/components/ui/pulse-dot';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
@@ -135,24 +136,7 @@ export default function ChatPage() {
                         );
                       })}
                   </div>
-                  <motion.div
-                    className="flex items-center mt-1"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <motion.div
-                      className="w-2 h-2 bg-blue-500 rounded-full mr-1"
-                      animate={{
-                        scale: [1, 1.2, 1],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Number.POSITIVE_INFINITY,
-                        repeatType: 'reverse',
-                      }}
-                    ></motion.div>
-                  </motion.div>
+                  {index === messages.length - 1 && <PulseDot />}
                 </div>
               )}
             </motion.div>
