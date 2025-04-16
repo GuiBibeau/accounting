@@ -67,93 +67,93 @@ export default function ChatPage() {
               transition={{ delay: index * 0.25, duration: 0.6 }} // Slower duration and adjusted delay
               className="mb-6 flex justify-center"
             >
-            {message.role === 'user' ? (
-              <motion.div
-                className="bg-white/10 rounded-full px-4 py-1.5 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full "
-                whileHover={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                }}
-              >
-                {message.content}
-              </motion.div>
-            ) : (
-              <div className="max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">
-                <div className="text-white">
-                  {message.content
-                    .split('\n\n')
-                    .map((paragraph: string, i: number) => {
-                      // Added types
-                      if (paragraph.includes('* ')) {
-                        const items = paragraph.split('* ').filter(Boolean);
+              {message.role === 'user' ? (
+                <motion.div
+                  className="bg-white/10 rounded-full px-4 py-1.5 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full "
+                  whileHover={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  }}
+                >
+                  {message.content}
+                </motion.div>
+              ) : (
+                <div className="max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">
+                  <div className="text-white">
+                    {message.content
+                      .split('\n\n')
+                      .map((paragraph: string, i: number) => {
+                        // Added types
+                        if (paragraph.includes('* ')) {
+                          const items = paragraph.split('* ').filter(Boolean);
+                          return (
+                            <motion.div
+                              key={i}
+                              className="mb-4"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.3 + i * 0.1 }}
+                            >
+                              <ul className="list-disc pl-5 space-y-1">
+                                {items.map(
+                                  (
+                                    item: string,
+                                    j: number // Added types
+                                  ) => (
+                                    <motion.li
+                                      key={j}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: 0.4 + j * 0.05 }}
+                                    >
+                                      {item}
+                                    </motion.li>
+                                  )
+                                )}
+                              </ul>
+                            </motion.div>
+                          );
+                        }
                         return (
-                          <motion.div
+                          <motion.p
                             key={i}
                             className="mb-4"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 + i * 0.1 }}
                           >
-                            <ul className="list-disc pl-5 space-y-1">
-                              {items.map(
-                                (
-                                  item: string,
-                                  j: number // Added types
-                                ) => (
-                                  <motion.li
-                                    key={j}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.4 + j * 0.05 }}
-                                  >
-                                    {item}
-                                  </motion.li>
-                                )
-                              )}
-                            </ul>
-                          </motion.div>
+                            {paragraph}
+                          </motion.p>
                         );
-                      }
-                      return (
-                        <motion.p
-                          key={i}
-                          className="mb-4"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.3 + i * 0.1 }}
-                        >
-                          {paragraph}
-                        </motion.p>
-                      );
-                    })}
-                </div>
-                <motion.div
-                  className="flex items-center mt-1"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
+                      })}
+                  </div>
                   <motion.div
-                    className="w-2 h-2 bg-blue-500 rounded-full mr-1"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: 'reverse',
-                    }}
-                  ></motion.div>
-                </motion.div>
-              </div>
-            )}
+                    className="flex items-center mt-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <motion.div
+                      className="w-2 h-2 bg-blue-500 rounded-full mr-1"
+                      animate={{
+                        scale: [1, 1.2, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatType: 'reverse',
+                      }}
+                    ></motion.div>
+                  </motion.div>
+                </div>
+              )}
             </motion.div>
           ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-800">
-        <div className="relative">
+      <div className="p-4 w-full mb-8">
+        <div className="relative mx-auto max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">
           <motion.div
             className="rounded-xl bg-[#333] border border-gray-700 overflow-hidden"
             whileFocus={{ borderColor: 'rgba(255, 255, 255, 0.3)' }}
