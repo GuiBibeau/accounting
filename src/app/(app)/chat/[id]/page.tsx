@@ -1,14 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { PaperclipIcon, SendHorizontal } from 'lucide-react';
-import { PulseDot } from '@/components/ui/pulse-dot';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { getMessages, saveMessage } from '@/lib/messages';
 import { useChat, type Message } from '@ai-sdk/react';
 import { useUser } from '@/contexts/AuthContext';
+import { ChatInput } from './ChatInput';
 
 export default function ChatPage() {
   const { user } = useUser();
@@ -20,10 +19,17 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { handleSubmit, status, messages, input, handleInputChange, setInput, setMessages } =
-    useChat({
-      onFinish,
-    });
+  const {
+    handleSubmit,
+    status,
+    messages,
+    input,
+    handleInputChange,
+    setInput,
+    setMessages,
+  } = useChat({
+    onFinish,
+  });
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,27 +74,22 @@ export default function ChatPage() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.25, duration: 0.6 }} // Slower duration and adjusted delay
+              transition={{ delay: index * 0.25, duration: 0.6 }}
               className="mb-6 flex justify-center"
             >
               {message.role === 'user' ? (
-                <motion.div
-                  className="flex items-center gap-3 bg-white/10 rounded-full px-4 py-3 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full"
-                  whileHover={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  }}
-                >
-                  <Avatar className="h-8 w-8 bg-blue-500 dark:bg-blue-600 text-white">
+                <motion.div className="flex items-center gap-3 bg-accent rounded-full px-4 py-3 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full hover:bg-accent/90">
+                  <Avatar className="h-8 w-8 bg-primary text-primary-foreground">
                     <AvatarImage src="/user-avatar.png" />
-                    <AvatarFallback className="bg-blue-500 dark:bg-blue-600 text-white">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
                       {user?.email?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div>{message.content}</div>
                 </motion.div>
               ) : (
-                <div className="max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">
-                  <div className="text-white">
+                <div className="flex items-center  rounded-full px-4 py-3 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full">
+                  <div className="text-foreground w-full">
                     {message.content
                       .split('\n\n')
                       .map((paragraph: string, i: number) => {
@@ -136,7 +137,6 @@ export default function ChatPage() {
                         );
                       })}
                   </div>
-                  {index === messages.length - 1 && <PulseDot />}
                 </div>
               )}
             </motion.div>
@@ -145,42 +145,11 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="p-4 w-full mb-8">
-        <div className="relative mx-auto max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">
-          <motion.div
-            className="rounded-xl bg-[#333] border border-gray-700 overflow-hidden"
-            whileFocus={{ borderColor: 'rgba(255, 255, 255, 0.3)' }}
-            whileHover={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
-          >
-            <form onSubmit={handleSubmitMessage}>
-              <input
-                value={input}
-                onChange={handleInputChange}
-                className="w-full bg-transparent px-4 py-3 outline-none resize-none h-12"
-                placeholder="Ask anything, create anything"
-              />
-            </form>
-
-            <div className="absolute right-2 bottom-2 flex items-center">
-              <motion.button
-                className="p-2 text-gray-400"
-                whileHover={{ scale: 1.1, color: '#fff' }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <PaperclipIcon className="w-5 h-5" />
-              </motion.button>
-              <motion.button
-                type="submit"
-                className="p-2 rounded-full bg-blue-500 ml-2"
-                whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <SendHorizontal className="w-5 h-5 text-white" />
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
-      </div>
+      <ChatInput
+        input={input}
+        handleInputChange={handleInputChange}
+        handleSubmitMessage={handleSubmitMessage}
+      />
     </>
   );
 }

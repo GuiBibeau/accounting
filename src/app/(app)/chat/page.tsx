@@ -10,9 +10,9 @@ export default function Home() {
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
       <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 overflow-auto">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-center text-blue-300 mb-6 sm:mb-8 flex items-center justify-center">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-center text-primary mb-6 sm:mb-8 flex items-center justify-center">
               relation.dev
-              <Code2 className="w-5 h-5 ml-2 text-blue-300" />
+              <Code2 className="w-5 h-5 ml-2 text-primary" />
             </h1>
 
             {/* Action Buttons */}
@@ -129,7 +129,7 @@ export default function Home() {
               ].map((button, index) => (
                 <button
                   key={index}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full border border-gray-700 bg-[#333] text-xs sm:text-sm hover:bg-[#444] hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full border border-border bg-secondary text-secondary-foreground text-xs sm:text-sm hover:bg-secondary/80 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all"
                 >
                   {button.icon}
                   <span className="hidden xs:inline">{button.text}</span>
@@ -145,7 +145,7 @@ export default function Home() {
 
             {/* Suggestion */}
             <div className="flex justify-center mb-8 sm:mb-12">
-              <button className="flex items-center gap-2 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-[#333] text-xs sm:text-sm">
+              <button className="flex items-center gap-2 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-secondary text-secondary-foreground text-xs sm:text-sm hover:bg-secondary/80">
                 <span className="hidden sm:inline">
                   Draft a tweet about the latest feature release
                 </span>
@@ -179,7 +179,7 @@ export default function Home() {
               ].map((card, index) => (
                 <div
                   key={index}
-                  className="rounded-xl overflow-hidden border border-gray-800 bg-[#222] hover:-translate-y-2 hover:shadow-lg hover:border-gray-600 transition-all"
+                  className="rounded-xl overflow-hidden border border-border bg-card hover:-translate-y-2 hover:shadow-lg transition-all"
                 >
                   <div className="relative h-40 sm:h-48">
                     <Image

@@ -112,7 +112,7 @@ export const SideNav = () => {
   const viewAllConversations = () => {};
   return (
     <motion.div
-      className="border-r border-border flex flex-col relative bg-background"
+      className="border-r border-border flex flex-col relative bg-background text-foreground"
       initial={sidebarExpanded ? 'expanded' : 'collapsed'}
       animate={sidebarExpanded ? 'expanded' : 'collapsed'}
       variants={sidebarVariants}
@@ -138,7 +138,7 @@ export const SideNav = () => {
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 500 }}
               >
-                <Code2 className="w-5 h-5 text-blue-300" />
+                <Code2 className="w-5 h-5 text-primary" />
               </motion.div>
             </Link>
           )}
@@ -211,7 +211,7 @@ export const SideNav = () => {
                     whileTap={{ scale: 0.98 }}
                     className={`w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm rounded-md ${
                       activeConversation === conversation.id
-                        ? 'bg-white/10'
+                        ? 'bg-accent'
                         : ''
                     }`}
                   >
@@ -225,10 +225,10 @@ export const SideNav = () => {
 
                 {conversationHistory.length > 5 && (
                   <motion.button
-                    whileHover={{ x: 4, color: '#fff' }}
+                    whileHover={{ x: 4 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={viewAllConversations}
-                    className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-muted-foreground rounded-md"
+                    className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-md"
                   >
                     <span>View all conversations...</span>
                   </motion.button>
@@ -247,7 +247,7 @@ export const SideNav = () => {
             >
               <Link href="/chat" passHref>
               <motion.button
-                className="p-2 rounded-md hover:bg-white/5"
+                className="p-2 rounded-md"
                 aria-label="Home"
                 whileHover={{
                   scale: 1.1,
@@ -260,7 +260,7 @@ export const SideNav = () => {
               </Link>
               <Link href="/chat/history" passHref>
                 <motion.button
-                  className="p-2 rounded-md hover:bg-white/5"
+                  className="p-2 rounded-md"
                   aria-label="View chat history"
                 whileHover={{
                   scale: 1.1,

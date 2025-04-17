@@ -32,8 +32,7 @@ export const LandingChatInput: React.FC = () => {
     >
       <div className="rainbow-border-container">
         <motion.div
-          className="rounded-xl bg-[#333] border border-gray-700 overflow-hidden"
-          whileHover={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
+          className="rounded-xl bg-card border border-border overflow-hidden"
           animate={{
             boxShadow: [
               '0px 0px 0px rgba(0,0,0,0)',
@@ -55,25 +54,25 @@ export const LandingChatInput: React.FC = () => {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <div className="flex items-center justify-end px-3 py-2 border-t border-gray-700">
+          <div className="flex items-center justify-end px-3 py-2 border-t border-border">
             <motion.button
-              className="p-2 text-gray-400"
-              whileHover={{ scale: 1.1, color: '#fff' }}
+              className="p-2 text-muted-foreground hover:text-foreground"
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
               <PaperclipIcon className="w-5 h-5" />
             </motion.button>
             <motion.button
-              className="p-2 rounded-full bg-blue-500 ml-2"
+              className="p-2 rounded-full bg-primary hover:bg-primary/90 ml-2"
               onClick={() => {
                 if (inputValue.trim()) {
                   setInputValue('');
                 }
               }}
-              whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              <SendHorizontal className="w-5 h-5 text-white" />
+              <SendHorizontal className="w-5 h-5 text-primary-foreground" />
             </motion.button>
           </div>
         </motion.div>
