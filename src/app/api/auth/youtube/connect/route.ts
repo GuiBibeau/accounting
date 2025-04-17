@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
-import { randomBytes } from 'crypto';
+import { adminAuth } from '@/lib/firebase-admin'; // Import Firebase Admin Auth
 
 // Define the required YouTube scopes
 const scopes = [
@@ -9,7 +9,25 @@ const scopes = [
   'https://www.googleapis.com/auth/yt-analytics.readonly',
 ];
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // --- Firebase Authentication ---
+  const authorization = request.headers.get('Authorization');
+  if (!authorization?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized: Missing Bearer token' }, { status: 401 });
+  }
+  const idToken = authorization.split('Bearer ')[1];
+
+  let userId: string;
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    userId = decodedToken.uid;
+    console.log(`Verified user ID: ${userId} for YouTube connect`);
+  } catch (error) {
+    console.error('Error verifying Firebase ID token:', error);
+    return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
+  }
+  // --- End Firebase Authentication ---
+
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
@@ -24,15 +42,14 @@ export async function GET() {
 
   const oauthClient = new OAuth2Client(clientId, clientSecret, redirectUri);
 
-  // Generate state for CSRF protection
-  const state = randomBytes(16).toString('hex');
-  // Note: In a full implementation, we'd store this state server-side (e.g., session, short-lived DB entry)
-  // and verify it in the callback. For now, we generate it and pass it along.
+  // Use Firebase UID as state parameter
+  const state = userId;
+  console.log(`Using Firebase UID as state: ${state}`);
 
   const authorizationUrl = oauthClient.generateAuthUrl({
     access_type: 'offline', // Request refresh token
     scope: scopes,
-    state: state,
+    state: state, // Pass Firebase UID as state
     prompt: 'consent', // Force consent screen to ensure refresh token is requested
   });
 

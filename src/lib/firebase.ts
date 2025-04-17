@@ -15,7 +15,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 // Check if Firebase app already exists to avoid reinitialization (common in Next.js HMR)
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp(); // Export app
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Code2 } from 'lucide-react';
+import { ConnectYouTubeButton } from '@/components/ConnectYouTubeButton'; // Import the button
 
 import { LandingChatInput } from './LandingChatInput';
 
@@ -135,6 +136,8 @@ export default function Home() {
                   <span className="xs:hidden">{button.mobileText}</span>
                 </button>
               ))}
+              {/* Add the YouTube Connect Button */}
+              <ConnectYouTubeButton />
             </div>
 
             {/* Input Area */}

@@ -1,37 +1,28 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
+import { adminDb } from '@/lib/firebase-admin';
+import { encrypt } from '@/lib/encryption';
 
+/**
+ * Handles the Google OAuth callback for YouTube authentication.
+ * Exchanges the authorization code for tokens, encrypts them, and stores in Firestore.
+ * 
+ * @param {NextRequest} request - The incoming request containing the authorization code and state
+ * @returns {Promise<NextResponse>} Response indicating success or failure
+ */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
-  const state = searchParams.get('state');
+  const userId = searchParams.get('state');
 
-  console.log('Received Google OAuth callback');
-  console.log(`Code: ${code ? code.substring(0, 10) + '...' : 'N/A'}`); // Log only prefix for brevity/security
-  console.log(`State: ${state}`);
-
-  // --- State Verification ---
-  // TODO: Implement proper state verification.
-  // In the initiation route (connect/route.ts), the generated 'state' was not stored.
-  // For security (CSRF protection), the 'state' generated during initiation should be
-  // stored (e.g., in a short-lived cookie, session, or database entry tied to the user's session)
-  // and compared with the 'state' received here.
-  // Since we skipped storing it, we cannot verify it now. This is a security risk.
-  if (!state) {
-    console.warn('State parameter missing in callback.');
-    // In a real app, you'd likely redirect to an error page or return an error response.
+  if (!userId) {
+    return NextResponse.json(
+      { error: 'State parameter (User ID) missing.' },
+      { status: 400 },
+    );
   }
-  // Add actual verification logic here when state storage is implemented.
-  // Example:
-  // const storedState = request.cookies.get('oauth_state')?.value;
-  // if (!state || !storedState || state !== storedState) {
-  //   console.error('Invalid state parameter.');
-  //   return NextResponse.json({ error: 'Invalid state parameter.' }, { status: 401 });
-  // }
-  // request.cookies.delete('oauth_state'); // Clear the state cookie
 
   if (!code) {
-    console.error('Authorization code missing in callback.');
     return NextResponse.json(
       { error: 'Authorization code missing.' },
       { status: 400 },
@@ -40,10 +31,9 @@ export async function GET(request: NextRequest) {
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI; // Must match the one used in initiation
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   if (!clientId || !clientSecret || !redirectUri) {
-    console.error('Missing Google OAuth credentials in environment variables');
     return NextResponse.json(
       { error: 'Server configuration error: Missing Google OAuth credentials.' },
       { status: 500 },
@@ -54,29 +44,50 @@ export async function GET(request: NextRequest) {
 
   try {
     const { tokens } = await oauthClient.getToken(code);
-    console.log('Successfully exchanged code for tokens:');
-    console.log('Access Token:', tokens.access_token ? tokens.access_token.substring(0, 10) + '...' : 'N/A');
-    console.log('Refresh Token:', tokens.refresh_token ? tokens.refresh_token.substring(0, 10) + '...' : 'N/A');
-    console.log('Expiry Date:', tokens.expiry_date ? new Date(tokens.expiry_date).toLocaleString() : 'N/A');
-    console.log('Scopes:', tokens.scope);
 
-    // --- Token Storage (Placeholder) ---
-    // TODO: Implement secure storage (e.g., Firestore, encrypted) associated with the user.
-    // For now, we are just logging them as requested.
+    /** @type {{encryptedAccessToken: string, encryptedRefreshToken?: string, expiryDate: number | null, scopes: string | undefined, updatedAt: Date}} */
+    const credentialsToStore = {
+      encryptedAccessToken: encrypt(tokens.access_token!),
+      expiryDate: tokens.expiry_date ?? null,
+      scopes: tokens.scope,
+      updatedAt: new Date(),
+      ...(tokens.refresh_token && { 
+        encryptedRefreshToken: encrypt(tokens.refresh_token) 
+      })
+    };
 
-    // Redirect user to a success page or return a success message
-    // For simplicity, returning JSON response. Could redirect:
-    // const successUrl = new URL('/settings/integrations?status=youtube_success', request.nextUrl.origin);
-    // return NextResponse.redirect(successUrl);
+    await adminDb
+      .collection('users')
+      .doc(userId)
+      .collection('integrations')
+      .doc('youtube')
+      .set(credentialsToStore, { merge: true });
 
-    return NextResponse.json({
-      message: 'Authentication successful! Tokens received and logged.',
-      details: `Access token expires around: ${tokens.expiry_date ? new Date(tokens.expiry_date).toLocaleString() : 'N/A'}`,
+    return new NextResponse(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>YouTube Connection Complete</title>
+          <script>
+            window.close();
+          </script>
+        </head>
+        <body>
+          <p>YouTube connection successful. You can now close this window.</p>
+          <script>
+            setTimeout(() => {
+              window.close();
+            }, 1000);
+          </script>
+        </body>
+      </html>
+    `, {
+      headers: {
+        'Content-Type': 'text/html',
+      },
     });
 
-  } catch (error: any) {
-    console.error('Error exchanging code for tokens:', error.message);
-    console.error('Error details:', error.response?.data); // Log Google's error response if available
+  } catch (error) {
     return NextResponse.json(
       { error: 'Failed to exchange authorization code for tokens.', details: error.message },
       { status: 500 },
