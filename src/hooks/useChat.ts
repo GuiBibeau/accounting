@@ -15,6 +15,7 @@ interface UseChatOptions {
   onResponse?: (response: Response) => void;
   onFinish?: (message: Message) => void;
   onError?: (error: Error) => void;
+  systemPrompt?: string; // Add systemPrompt option
 }
 
 interface UseChatHelpers {
@@ -83,7 +84,12 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
       setError(undefined);
 
       const currentMessages = [...messages, newMessage];
-      const apiMessages = currentMessages.map(({ role, content }) => ({ role, content }));
+      // Prepare messages for API, potentially prepending system prompt
+      let apiMessages = currentMessages.map(({ role, content }) => ({ role, content }));
+      if (options.systemPrompt) {
+        apiMessages = [{ role: 'system', content: options.systemPrompt }, ...apiMessages];
+      }
+
 
       try {
         const response = await fetch(api, {
@@ -202,7 +208,11 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
 
     setMessages(messagesToResend);
 
-    const apiMessages = messagesToResend.map(({ role, content }) => ({ role, content }));
+    // Prepare messages for API, potentially prepending system prompt
+    let apiMessages = messagesToResend.map(({ role, content }) => ({ role, content }));
+     if (options.systemPrompt) {
+        apiMessages = [{ role: 'system', content: options.systemPrompt }, ...apiMessages];
+      }
 
     try {
         const response = await fetch(api, {

@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     // Generate the summary using Groq
     const { text: title } = await generateText({
       model: groq(groqSummarizationModelId),
-      prompt: `Summarize the following conversation in 7 words or less: ${message},`,
+      prompt: `Summarize the user's request in 6 words or less from a describtive, non person view: ${message},`,
     });
 
     return NextResponse.json({ title });

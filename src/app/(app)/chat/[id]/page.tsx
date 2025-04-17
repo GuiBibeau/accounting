@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import { getMessages, saveMessage } from '@/lib/messages';
 import { useChat, type Message } from '@/hooks/useChat';
 import { useUser } from '@/contexts/AuthContext';
+import { systemPrompt } from '@/lib/system-prompt'; // Import the system prompt
 import { ChatInput } from './ChatInput';
 
 export default function ChatPage() {
@@ -38,6 +39,7 @@ export default function ChatPage() {
     isLoading,
   } = useChat({
     onFinish,
+    systemPrompt, // Pass the system prompt
   });
 
   useEffect(() => {
