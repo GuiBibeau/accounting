@@ -1,14 +1,15 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { getMessages, saveMessage } from '@/lib/messages';
 import { useChat, type Message } from '@/hooks/useChat';
 import { useUser } from '@/contexts/AuthContext';
-import { systemPrompt } from '@/lib/system-prompt'; // Import the system prompt
+import { systemPrompt } from '@/lib/system-prompt';
 import { ChatInput } from './ChatInput';
+import { AssistantMessage } from './AssistantMessage'; 
+import { UserMessage } from './UserMessage';
 
 export default function ChatPage() {
   const { user } = useUser();
@@ -65,8 +66,7 @@ export default function ChatPage() {
       }
     );
     return () => unsubscribe();
-    // Update dependency array
-  }, [conversationId, append, isLoading, messages.length, setMessages]); // Removed handleSubmit, setInput, status; Added append, isLoading, messages.length
+  }, [conversationId, append, isLoading, messages.length, setMessages]); 
 
   const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,66 +90,9 @@ export default function ChatPage() {
               className="mb-6 flex justify-center"
             >
               {message.role === 'user' ? (
-                <motion.div className="flex items-center gap-3 bg-accent rounded-full px-4 py-3 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full hover:bg-accent/90">
-                  <Avatar className="h-8 w-8 bg-primary text-primary-foreground">
-                    <AvatarImage src="/user-avatar.png" />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {user?.email?.charAt(0).toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>{message.content}</div>
-                </motion.div>
+                <UserMessage content={message.content} userEmail={user?.email} /> // Use the UserMessage component
               ) : (
-                <div className="flex items-center  rounded-full px-4 py-3 max-w-[90%] md:max-w-[80%] lg:max-w-[70%] w-full">
-                  <div className="text-foreground w-full">
-                    {message.content
-                      .split('\n\n')
-                      .map((paragraph: string, i: number) => {
-                        // Added types
-                        if (paragraph.includes('* ')) {
-                          const items = paragraph.split('* ').filter(Boolean);
-                          return (
-                            <motion.div
-                              key={i}
-                              className="mb-4"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.3 + i * 0.1 }}
-                            >
-                              <ul className="list-disc pl-5 space-y-1">
-                                {items.map(
-                                  (
-                                    item: string,
-                                    j: number // Added types
-                                  ) => (
-                                    <motion.li
-                                      key={j}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: 0.4 + j * 0.05 }}
-                                    >
-                                      {item}
-                                    </motion.li>
-                                  )
-                                )}
-                              </ul>
-                            </motion.div>
-                          );
-                        }
-                        return (
-                          <motion.p
-                            key={i}
-                            className="mb-4"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 + i * 0.1 }}
-                          >
-                            {paragraph}
-                          </motion.p>
-                        );
-                      })}
-                  </div>
-                </div>
+                <AssistantMessage content={message.content} /> // Use the AssistantMessage component
               )}
             </motion.div>
           ))}
