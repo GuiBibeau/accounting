@@ -3,7 +3,7 @@
 import { AnimatePresence } from 'framer-motion';
 import { motion } from 'framer-motion';
 import {
-  Calculator,
+  Code2,
   ChevronLeft,
   ChevronRight,
   HomeIcon,
@@ -127,7 +127,7 @@ export const SideNav = () => {
               exit={{ opacity: 0 }}
               className="font-semibold"
             >
-              <Link href="/chat">Aiccountant</Link>
+              <Link href="/chat">relation.dev</Link>
             </motion.span>
           ) : (
             <Link href="/chat">
@@ -138,7 +138,7 @@ export const SideNav = () => {
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 500 }}
               >
-                <Calculator className="w-5 h-5 text-blue-300" />
+                <Code2 className="w-5 h-5 text-blue-300" />
               </motion.div>
             </Link>
           )}

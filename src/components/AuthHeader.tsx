@@ -34,15 +34,15 @@ export default function AuthHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="container flex h-14 max-w-screen-2xl items-center">
+      <nav className="container flex h-14 max-w-screen-2xl items-center justify-between px-4 sm:px-6">
         {/* App Name/Logo */}
-        <Link href="/" className="mr-6 flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2">
           {/* <Icons.logo className="h-6 w-6" /> Optional Logo */}
-          <span className="font-bold">AI Accountant</span>
+          <span className="font-bold">relation.dev</span>
         </Link>
 
-        {/* Spacer */}
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        {/* Auth Buttons */}
+        <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Loading State */}
           {loading && (
             <span className="text-sm text-muted-foreground">Loading...</span>

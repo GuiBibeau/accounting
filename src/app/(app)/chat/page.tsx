@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Calculator } from 'lucide-react';
+import { Code2 } from 'lucide-react';
 
 import { LandingChatInput } from './LandingChatInput';
 
@@ -10,8 +10,8 @@ export default function Home() {
     <div className="flex-1 overflow-hidden flex flex-col">
       <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 overflow-auto">
             <h1 className="text-2xl sm:text-3xl font-semibold text-center text-blue-300 mb-6 sm:mb-8 flex items-center justify-center">
-              Aiccountant
-              <Calculator className="w-5 h-5 ml-2 text-blue-300" />
+              relation.dev
+              <Code2 className="w-5 h-5 ml-2 text-blue-300" />
             </h1>
 
             {/* Action Buttons */}
@@ -31,13 +31,12 @@ export default function Home() {
                       strokeLinejoin="round"
                       className="w-3 h-3 sm:w-4 sm:h-4"
                     >
-                      <rect width="18" height="18" x="3" y="3" rx="2" />
-                      <path d="M3 9h18" />
-                      <path d="M9 21V9" />
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                     </svg>
                   ),
-                  text: 'Generate Timesheet',
-                  mobileText: 'Timesheet',
+                  text: 'Draft Blog Post',
+                  mobileText: 'Blog',
                 },
                 {
                   icon: (
@@ -53,14 +52,11 @@ export default function Home() {
                       strokeLinejoin="round"
                       className="w-3 h-3 sm:w-4 sm:h-4"
                     >
-                      <path d="M21 14H3" />
-                      <path d="M21 9H3" />
-                      <path d="M21 4H3" />
-                      <path d="M21 19H3" />
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                   ),
-                  text: 'Send Invoice',
-                  mobileText: 'Invoice',
+                  text: 'Analyze Community',
+                  mobileText: 'Community',
                 },
                 {
                   icon: (
@@ -76,13 +72,13 @@ export default function Home() {
                       strokeLinejoin="round"
                       className="w-3 h-3 sm:w-4 sm:h-4"
                     >
-                      <circle cx="8" cy="21" r="1" />
-                      <circle cx="19" cy="21" r="1" />
-                      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" x2="12" y1="19" y2="22"></line>
                     </svg>
                   ),
-                  text: 'View Payables',
-                  mobileText: 'Payables',
+                  text: 'Plan Conference Talk',
+                  mobileText: 'Talk',
                 },
                 {
                   icon: (
@@ -98,12 +94,12 @@ export default function Home() {
                       strokeLinejoin="round"
                       className="w-3 h-3 sm:w-4 sm:h-4"
                     >
-                      <path d="M12 2v20" />
-                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
                   ),
-                  text: 'Track Expenses',
-                  mobileText: 'Expenses',
+                  text: 'Generate Release Notes',
+                  mobileText: 'Release',
                 },
                 {
                   icon: (
@@ -119,12 +115,15 @@ export default function Home() {
                       strokeLinejoin="round"
                       className="w-3 h-3 sm:w-4 sm:h-4"
                     >
-                      <rect width="20" height="14" x="2" y="5" rx="2" />
-                      <line x1="2" x2="22" y1="10" y2="10" />
+                      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                      <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                      <path d="M9 18v-6"></path>
+                      <path d="m15 12-6 6"></path>
+                      <path d="m15 18-6-6"></path>
                     </svg>
                   ),
-                  text: 'Run Payroll',
-                  mobileText: 'Payroll',
+                  text: 'Check GitHub Issues',
+                  mobileText: 'Issues',
                 },
               ].map((button, index) => (
                 <button
@@ -145,9 +144,9 @@ export default function Home() {
             <div className="flex justify-center mb-8 sm:mb-12">
               <button className="flex items-center gap-2 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-[#333] text-xs sm:text-sm">
                 <span className="hidden sm:inline">
-                  Create an invoice for my latest client project
+                  Draft a tweet about the latest feature release
                 </span>
-                <span className="sm:hidden">Create an invoice for client</span>
+                <span className="sm:hidden">Draft feature tweet</span>
               </button>
             </div>
 
@@ -155,27 +154,24 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {[
                 {
-                  src: '/financial-overview-dashboard.png',
-                  alt: 'Financial planning dashboard',
-                  title:
-                    'Business Cash Flow Management: Optimizing Working Capital',
+                  src: '/next.svg',
+                  alt: 'Developer documentation',
+                  title: 'Improving Developer Documentation: Best Practices',
                 },
                 {
-                  src: '/tax-documents-organized.png',
-                  alt: 'Tax preparation documents',
-                  title: 'Small Business Tax Strategies: Maximizing Deductions',
+                  src: '/vercel.svg',
+                  alt: 'Community engagement',
+                  title: 'Engaging Your Developer Community Effectively',
                 },
                 {
-                  src: '/growth-strategy-overview.png',
-                  alt: 'Investment portfolio analysis',
-                  title:
-                    'Inventory Management: Reducing Costs While Meeting Demand',
+                  src: '/globe.svg',
+                  alt: 'Conference speaking',
+                  title: 'Speaking at Tech Conferences: A Practical Guide',
                 },
                 {
-                  src: '/retirement-planning-abstract.png',
-                  alt: 'Retirement planning calculator',
-                  title:
-                    'Employee Benefits Analysis: Balancing Costs and Retention',
+                  src: '/window.svg',
+                  alt: 'Developer relations metrics',
+                  title: 'Measuring DevRel Impact: Key Metrics to Track',
                 },
               ].map((card, index) => (
                 <div
