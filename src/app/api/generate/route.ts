@@ -1,113 +1,84 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import {
+  AiProviderMessage,
+  AiProviderId,
+  AiProviderOptions,
+} from '@/lib/ai/types';
+import { getAiProvider, determineProviderFromModel } from '@/lib/ai/service';
 
-// Define the expected structure for messages in the request body
-interface GroqMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
 
 interface RequestBody {
-  messages: GroqMessage[];
-  model?: string; // Optional model override
+  messages: AiProviderMessage[];
+  model?: string;
+  provider?: AiProviderId;
+  stream?: boolean;
 }
 
-export const runtime = 'edge'; // Use edge runtime for streaming
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
-  const groqApiKey = process.env.GROQ_API_KEY;
-
-  if (!groqApiKey) {
-    return NextResponse.json(
-      { error: 'Groq API key not configured' },
-      { status: 500 }
-    );
-  }
-
   let requestBody: RequestBody;
   try {
     requestBody = await req.json();
-  } catch { // Removed unused 'error' variable
+  } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  const { messages, model = 'llama3-70b-8192' } = requestBody;
+  const {
+    messages,
+    model = 'llama3-70b-8192',
+    provider: explicitProvider,
+    stream = true,
+  } = requestBody;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: 'Missing or invalid messages array' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Missing or invalid messages array' },
+      { status: 400 }
+    );
   }
 
-  const groqApiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+  let providerId: AiProviderId;
 
   try {
-    const groqResponse = await fetch(groqApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${groqApiKey}`,
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: messages,
-        stream: true,
-      }),
-    });
 
-    if (!groqResponse.ok) {
-      const errorText = await groqResponse.text();
-      console.error('Groq API Error:', errorText);
-      return NextResponse.json(
-        { error: `Groq API error: ${groqResponse.statusText}`, details: errorText },
-        { status: groqResponse.status }
-      );
-    }
-
-    // Ensure the response body is a ReadableStream
-    if (!groqResponse.body) {
-        return NextResponse.json({ error: 'Groq API response body is null' }, { status: 500 });
-    }
-
-    // Create a new ReadableStream to pipe the Groq stream through
-    const responseStream = new ReadableStream({
-      async start(controller) {
-        const reader = groqResponse.body!.getReader();
-        // Removed unused 'decoder' variable
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              break;
-            }
-            // Pass the chunk directly to the client
-            controller.enqueue(value);
-          }
-        } catch (error) {
-          console.error('Error reading Groq stream:', error);
-          controller.error(error);
-        } finally {
-          controller.close();
-        }
-      },
-      cancel(reason) {
-        console.log('Stream cancelled:', reason);
-        // You might want to add logic here if the underlying fetch needs cancellation
-      }
-    });
-
-    // Return the stream response
-    return new NextResponse(responseStream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      },
-    });
-
+    providerId = explicitProvider || determineProviderFromModel(model);
   } catch (error) {
-    console.error('Error calling Groq API:', error);
+    console.error('Error determining AI provider:', error);
     return NextResponse.json(
-      { error: 'Failed to call Groq API', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
+      {
+        error: 'Could not determine AI provider',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const aiProvider = getAiProvider(providerId);
+
+    const options: AiProviderOptions = {
+      messages,
+      model,
+      stream,
+
+    };
+
+
+    const response = await aiProvider.generate(options);
+
+
+    return response;
+  } catch (error) {
+    console.error(`Error calling ${providerId} provider:`, error);
+
+    const status = error instanceof Error && error.message.startsWith('Unsupported AI provider') ? 400 : 500;
+    return NextResponse.json(
+      {
+        error: `Failed to get response from ${providerId} provider`,
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status }
     );
   }
 }

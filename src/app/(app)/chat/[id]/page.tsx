@@ -40,7 +40,8 @@ export default function ChatPage() {
     isLoading,
   } = useChat({
     onFinish,
-    systemPrompt, // Pass the system prompt
+    systemPrompt,
+
   });
 
   useEffect(() => {
