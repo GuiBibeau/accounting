@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { getMessages, saveMessage } from '@/lib/messages';
-import { useChat, type Message } from '@ai-sdk/react';
+import { useChat, type Message } from '@/hooks/useChat';
 import { useUser } from '@/contexts/AuthContext';
 import { ChatInput } from './ChatInput';
 
@@ -14,19 +14,28 @@ export default function ChatPage() {
   const { id: conversationId } = useParams();
 
   const onFinish = (message: Message) => {
-    saveMessage(conversationId as string, message);
+    if (conversationId && typeof conversationId === 'string') {
+      saveMessage(conversationId, {
+        role: message.role,
+        content: message.content,
+      });
+    } else {
+      console.error(
+        'Conversation ID is missing or invalid, cannot save message.'
+      );
+    }
   };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
     handleSubmit,
-    status,
     messages,
     input,
     handleInputChange,
-    setInput,
     setMessages,
+    append,
+    isLoading,
   } = useChat({
     onFinish,
   });
@@ -40,21 +49,22 @@ export default function ChatPage() {
     const unsubscribe = getMessages(
       conversationId as string,
       (firebaseMessages) => {
-        // this will send the first message to the chat endpoint and then update the messages state
         if (
           firebaseMessages.length === 1 &&
-          status === 'ready' &&
+          !isLoading &&
           messages.length === 0
         ) {
-          setInput(firebaseMessages[0].content);
-          handleSubmit();
+          append({ role: 'user', content: firebaseMessages[0].content });
         } else if (firebaseMessages.length > 1) {
-          setMessages(firebaseMessages);
+          if (messages.length === 0) {
+            setMessages(firebaseMessages);
+          }
         }
       }
     );
     return () => unsubscribe();
-  }, [conversationId, handleSubmit, setInput, status, messages, setMessages]);
+    // Update dependency array
+  }, [conversationId, append, isLoading, messages.length, setMessages]); // Removed handleSubmit, setInput, status; Added append, isLoading, messages.length
 
   const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
