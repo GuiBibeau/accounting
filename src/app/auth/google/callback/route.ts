@@ -89,7 +89,8 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to exchange authorization code for tokens.', details: error.message },
+
+      { error: 'Failed to exchange authorization code for tokens.', details: error },
       { status: 500 },
     );
   }

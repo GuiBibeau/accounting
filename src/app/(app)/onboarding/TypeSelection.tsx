@@ -24,7 +24,7 @@ export default function TypeSelection({ onSelectType }: TypeSelectionProps) {
             className="w-full"
             size="lg"
           >
-            I'm a Freelancer
+            I&apos;m a Freelancer
           </Button>
         </div>
         <div className="w-full">
