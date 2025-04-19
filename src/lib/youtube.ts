@@ -5,7 +5,7 @@ import { decrypt, encrypt } from '@/lib/encryption';
 import * as admin from 'firebase-admin';
 import { GaxiosError } from 'gaxios';
 
-interface YouTubeCredentials {
+export interface YouTubeCredentials {
   encryptedAccessToken: string;
   encryptedRefreshToken?: string;
   expiryDate: number | null;
