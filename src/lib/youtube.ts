@@ -5,15 +5,16 @@ import { decrypt, encrypt } from '@/lib/encryption';
 import * as admin from 'firebase-admin';
 import { GaxiosError } from 'gaxios';
 
-export interface YouTubeCredentials {
+
+export type YouTubeCredentials = {
   encryptedAccessToken: string;
   encryptedRefreshToken?: string;
   expiryDate: number | null;
   scopes?: string;
   updatedAt: admin.firestore.Timestamp | Date;
-}
+};
 
-interface ChannelMetadata {
+type ChannelMetadata = {
   id: string;
   userId: string;
   title: string;
@@ -24,9 +25,9 @@ interface ChannelMetadata {
   subscriberCount?: string;
   videoCount?: string;
   lastSyncedAt?: admin.firestore.Timestamp | Date;
-}
+};
 
-interface VideoDetails {
+type VideoDetails = {
   id: string;
   userId: string;
   channelId: string;
@@ -38,9 +39,9 @@ interface VideoDetails {
   viewCount?: string;
   likeCount?: string;
   commentCount?: string;
-}
+};
 
-interface CommentDetails {
+type CommentDetails = {
   id: string;
   userId: string;
   channelId: string;
@@ -53,7 +54,7 @@ interface CommentDetails {
   likeCount: number;
   totalReplyCount?: number;
   parentId?: string;
-}
+};
 
 const getCredentialsPath = (userId: string) =>
   `users/${userId}/integrations/youtube`;
@@ -330,12 +331,33 @@ export async function saveCommentData(userId: string, channelId: string, videoId
          return;
      }
      const commentRef = commentCollectionRef.doc(comment.id);
-     const commentDataToSave: CommentDetails = {
-         ...comment,
-         userId: userId,
-         channelId: channelId,
-         videoId: videoId
+
+     // Build the data object explicitly, adding optional fields only if defined
+     const commentDataToSave: Partial<CommentDetails> = {
+        // Required fields
+        id: comment.id,
+        userId: userId,
+        channelId: channelId,
+        videoId: videoId,
+        text: comment.text,
+        authorDisplayName: comment.authorDisplayName,
+        publishedAt: comment.publishedAt,
+        likeCount: comment.likeCount,
      };
+
+     if (comment.authorProfileImageUrl !== undefined) {
+        commentDataToSave.authorProfileImageUrl = comment.authorProfileImageUrl;
+     }
+     if (comment.updatedAt !== undefined) {
+        commentDataToSave.updatedAt = comment.updatedAt;
+     }
+     if (comment.totalReplyCount !== undefined) {
+        commentDataToSave.totalReplyCount = comment.totalReplyCount;
+     }
+     if (comment.parentId !== undefined) {
+        commentDataToSave.parentId = comment.parentId;
+     }
+
      batch.set(commentRef, commentDataToSave, { merge: true });
    });
 
