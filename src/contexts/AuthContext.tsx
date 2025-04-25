@@ -10,14 +10,16 @@ import React, {
 } from "react";
 import { useRouter, usePathname } from 'next/navigation';
 import { User, onAuthStateChanged, UserCredential } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { authService, AuthError } from "@/lib/auth.service";
 import { hasCompanyAssociation } from "@/lib/user";
+import { doc, getDoc, onSnapshot, Unsubscribe } from "firebase/firestore";
 
 interface AuthContextProps {
   user: User | null;
   loading: boolean;
   needsOnboarding: boolean | null;
+  isYouTubeConnected: boolean; 
   loginWithEmail: (email: string, password: string) => Promise<void>;
   signupWithEmail: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -36,6 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
+  const [isYouTubeConnected, setIsYouTubeConnected] = useState(false); 
   const [error, setError] = useState<AuthError | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -53,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setNeedsOnboarding(onboardingStatus);
         } catch (e) {
           console.error("Failed to check company association:", e);
-          onboardingStatus = false;
+          onboardingStatus = false; 
           setNeedsOnboarding(onboardingStatus);
           setError({ code: 'check-failed', message: 'Could not verify company status.' });
         }
@@ -90,6 +93,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
     return () => unsubscribe();
   }, [pathname, router]);
+
+  useEffect(() => {
+    let unsubscribeYouTube: Unsubscribe | null = null;
+
+    if (user) {
+      const youtubeCredsRef = doc(db, `users/${user.uid}/integrations/youtube`);
+      unsubscribeYouTube = onSnapshot(youtubeCredsRef, (docSnap) => {
+        setIsYouTubeConnected(docSnap.exists() && !!docSnap.data()?.encryptedAccessToken);
+      }, (error) => {
+        console.error("Failed to subscribe to YouTube connection status:", error);
+        setIsYouTubeConnected(false);
+      });
+    } else {
+      setIsYouTubeConnected(false);
+    }
+
+    return () => {
+      if (unsubscribeYouTube) {
+        unsubscribeYouTube();
+      }
+    };
+  }, [user]); 
 
   const clearError = useCallback(() => {
     setError(null);
@@ -137,6 +162,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signupWithEmail,
     loginWithGoogle,
     logout,
+    isYouTubeConnected,
     error,
     clearError,
   };
@@ -153,8 +179,8 @@ export const useAuth = (): AuthContextProps => {
 };
 
 export const useUser = () => {
-  const { user, loading, needsOnboarding } = useAuth();
-  return { user, loading, needsOnboarding };
+  const { user, loading, needsOnboarding, isYouTubeConnected } = useAuth();
+  return { user, loading, needsOnboarding, isYouTubeConnected };
 };
 
 export const useLogin = () => {

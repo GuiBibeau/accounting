@@ -3,7 +3,19 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 
-// Initialize Firebase Admin
+// Check if running in development and if emulator host is set
+const isDevelopment = process.env.NODE_ENV === 'development';
+const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
+
+if (isDevelopment && emulatorHost) {
+  console.log(`Firebase Admin SDK detected FIRESTORE_EMULATOR_HOST=${emulatorHost}. Connecting to Firestore emulator.`);
+} else if (isDevelopment) {
+  console.warn('Firebase Admin SDK running in development, but FIRESTORE_EMULATOR_HOST is not set. Connecting to PRODUCTION Firestore.');
+} else {
+  console.log('Firebase Admin SDK connecting to PRODUCTION Firestore.');
+}
+
+// Initialize Firebase Admin (SDK automatically uses FIRESTORE_EMULATOR_HOST if set)
 const adminApp = getApps()[0] || initializeApp({
   credential: cert({
     projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,

@@ -23,7 +23,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { CollapsibleSectionHeader } from '@/components/ui/CollapsibleSectionHeader'; 
+import { CollapsibleSectionHeader } from '@/components/ui/CollapsibleSectionHeader';
+import { ConnectYouTubeButton } from '@/components/ConnectYouTubeButton';
+import { YouTubeIcon } from '@/components/icons/YouTube';
+
 const sidebarVariants = {
   expanded: {
     width: '200px',
@@ -74,6 +77,7 @@ const fadeIn = {
 export const SideNav = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [isConversationListVisible, setIsConversationListVisible] = useState(true);
+  const [isYouTubeSectionVisible, setIsYouTubeSectionVisible] = useState(true);
   const [activeConversation] = useState<string | null>(null);
   const [conversationHistory, setConversationHistory] = useState<
     Conversation[]
@@ -81,7 +85,7 @@ export const SideNav = () => {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
-    
+
     const handleMediaChange = (e: MediaQueryListEvent) => {
       setSidebarExpanded(!e.matches);
     };
@@ -89,12 +93,12 @@ export const SideNav = () => {
     setSidebarExpanded(!mediaQuery.matches);
 
     mediaQuery.addEventListener('change', handleMediaChange);
-    
+
     return () => {
       mediaQuery.removeEventListener('change', handleMediaChange);
     };
   }, []);
-  const { user } = useAuth();
+  const { user, isYouTubeConnected } = useAuth();
   const { logout } = useLogout();
 
   useEffect(() => {
@@ -147,7 +151,6 @@ export const SideNav = () => {
         </AnimatePresence>
       </div>
 
-      {/* Toggle Button */}
       <motion.button
         className="absolute -right-3 top-14 transform bg-accent rounded-full p-1 border border-border z-10 hover:bg-accent/80 transition-colors"
         onClick={toggleSidebar}
@@ -180,7 +183,6 @@ export const SideNav = () => {
         </AnimatePresence>
       </motion.button>
 
-      {/* Navigation */}
       <div className="flex-1 py-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           {sidebarExpanded ? (
@@ -196,10 +198,8 @@ export const SideNav = () => {
                 title="Recent Conversations"
                 isExpanded={isConversationListVisible}
                 onToggle={() => setIsConversationListVisible(!isConversationListVisible)}
-                className="px-4" 
+                className="px-4"
               />
-
-\
               <AnimatePresence>
                 {isConversationListVisible && (
                   <motion.div
@@ -249,9 +249,43 @@ export const SideNav = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              <div className="px-4 py-1">
+                {isYouTubeConnected ? (
+                  <div>
+                    <div className="flex items-center justify-between">
+                       <div className="flex items-center flex-grow">
+                         <YouTubeIcon className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
+                         <CollapsibleSectionHeader
+                           title="YouTube"
+                           isExpanded={isYouTubeSectionVisible}
+                           onToggle={() => setIsYouTubeSectionVisible(!isYouTubeSectionVisible)}
+                           className="flex-grow p-0"
+                         />
+                       </div>
+                    </div>
+                    <AnimatePresence>
+                      {isYouTubeSectionVisible && (
+                        <motion.div
+                          key="youtube-content"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: 'easeInOut' }}
+                          className="pl-6 mt-1 space-y-1 overflow-hidden"
+                        >
+                          <p className="text-xs text-muted-foreground">YouTube options here...</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <ConnectYouTubeButton variant="full" />
+                )}
+              </div>
+
             </motion.div>
           ) : (
-            // Collapsed view - Show home and history icons
             <motion.div
               key="collapsed-nav"
               initial="hidden"
@@ -286,12 +320,30 @@ export const SideNav = () => {
                   <History className="w-5 h-5" />
                 </motion.button>
               </Link>
+
+              <div className="px-2">
+                {isYouTubeConnected ? (
+                  <motion.button
+                    className="p-2 rounded-md"
+                    aria-label="YouTube Options"
+                    whileHover={{
+                      scale: 1.1,
+                      backgroundColor: 'hsl(var(--accent))',
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <YouTubeIcon className="w-5 h-5" />
+                  </motion.button>
+                ) : (
+                  <ConnectYouTubeButton variant="icon" />
+                )}
+              </div>
+
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Me Button / Account Dialog */}
       <div className="p-4 border-t border-border">
         <Dialog>
           <DialogTrigger asChild>
@@ -324,12 +376,10 @@ export const SideNav = () => {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              {/* Future account options can go here */}
               {user?.email && (
                  <div className="text-sm text-muted-foreground">Logged in as: {user.email}</div>
               )}
             </div>
-             {/* Changed DialogFooter to just a Button for simplicity */}
             <Button variant="destructive" onClick={logout} className="w-full">
               Disconnect
             </Button>

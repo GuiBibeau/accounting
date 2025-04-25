@@ -4,18 +4,26 @@ import React, { useState } from 'react';
 import { getAuth } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react'; 
+import { YouTubeIcon } from '@/components/icons/YouTube'; 
 import { AppError, catchAsyncError } from '@/lib/errors';
 
 const auth = getAuth(app);
 
+type ConnectYouTubeButtonProps = {
+  variant?: 'icon' | 'full';
+};
+
 /**
  * Button component that initiates YouTube account connection.
  * Handles Firebase authentication and redirects to Google OAuth URL.
- * 
- * @returns {JSX.Element} Button with loading state and error handling
+ * Adapts display based on the variant prop (icon only or full text).
+ *
+ * @param {ConnectYouTubeButtonProps} props - Component props.
+ * @param {'icon' | 'full'} [props.variant='full'] - Display variant ('icon' or 'full').
+ * @returns {JSX.Element} Button with loading state and error handling.
  */
-export function ConnectYouTubeButton() {
+export function ConnectYouTubeButton({ variant = 'full' }: ConnectYouTubeButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
 
@@ -64,18 +72,26 @@ export function ConnectYouTubeButton() {
   };
 
   return (
-    <div>
-      <Button onClick={handleConnect} disabled={isLoading}>
+    <div className="w-full">
+      <Button
+        onClick={handleConnect}
+        disabled={isLoading}
+        className={`w-full bg-red-600 hover:bg-red-700 text-white ${variant === 'icon' ? 'px-2' : ''}`}
+        aria-label={variant === 'icon' ? 'Connect YouTube Account' : undefined}
+      >
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Connecting...
+            <Loader2 className={`h-4 w-4 animate-spin ${variant === 'full' ? 'mr-2' : ''}`} />
+            {variant === 'full' && 'Connecting...'}
           </>
         ) : (
-          'Connect YouTube Account'
+          <>
+            <YouTubeIcon className={`h-4 w-4 ${variant === 'full' ? 'mr-2' : ''}`} />
+            {variant === 'full' && 'Connect YouTube'}
+          </>
         )}
       </Button>
-      {error && <p className="mt-2 text-sm text-red-600">{error.message}</p>}
+      {error && <p className="mt-2 text-sm text-red-600 px-2">{error.message}</p>}
     </div>
   );
 }
