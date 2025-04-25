@@ -2,11 +2,12 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import React from 'react';
 
-interface CollapsibleSectionHeaderProps {
-  title: string;
+type CollapsibleSectionHeaderProps = {
+  title: React.ReactNode;
   isExpanded: boolean;
-  onToggle: () => void;
+  onToggle: (event: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
 }
 
@@ -18,10 +19,13 @@ export const CollapsibleSectionHeader: React.FC<CollapsibleSectionHeaderProps> =
 }) => {
   return (
     <div className={`flex items-center justify-between ${className}`}>
-      <h2 className="font-medium text-sm text-muted-foreground">{title}</h2>
+      <div className="font-medium text-sm text-muted-foreground flex-grow">{title}</div>
       <motion.button
-        onClick={onToggle}
-        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle(e);
+        }}
+        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent flex-shrink-0"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         aria-label={isExpanded ? `Hide ${title}` : `Show ${title}`}

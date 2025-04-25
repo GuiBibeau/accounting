@@ -136,8 +136,6 @@ export default function Home() {
                   <span className="xs:hidden">{button.mobileText}</span>
                 </button>
               ))}
-              {/* Add the YouTube Connect Button */}
-              <ConnectYouTubeButton />
             </div>
 
             {/* Input Area */}

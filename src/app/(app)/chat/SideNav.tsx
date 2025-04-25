@@ -76,8 +76,6 @@ const fadeIn = {
 
 export const SideNav = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [isConversationListVisible, setIsConversationListVisible] = useState(true);
-  const [isYouTubeSectionVisible, setIsYouTubeSectionVisible] = useState(true);
   const [activeConversation] = useState<string | null>(null);
   const [conversationHistory, setConversationHistory] = useState<
     Conversation[]
@@ -183,7 +181,7 @@ export const SideNav = () => {
         </AnimatePresence>
       </motion.button>
 
-      <div className="flex-1 py-4 overflow-y-auto">
+      <div className="flex-1 py-4 overflow-y-auto scrollbar-gutter-stable">
         <AnimatePresence mode="wait">
           {sidebarExpanded ? (
             <motion.div
@@ -191,93 +189,25 @@ export const SideNav = () => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              variants={fadeIn}
-              className="space-y-2"
+              className="space-y-2" 
             >
-              <CollapsibleSectionHeader
-                title="Recent Conversations"
-                isExpanded={isConversationListVisible}
-                onToggle={() => setIsConversationListVisible(!isConversationListVisible)}
-                className="px-4"
-              />
-              <AnimatePresence>
-                {isConversationListVisible && (
-                  <motion.div
-                    key="conversation-list"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    className="space-y-1 overflow-hidden"
-                  >
-                    {conversationHistory.slice(0, 5).map((conversation, index) => (
-                      <motion.button
-                        key={conversation.id}
-                        custom={index}
-                        variants={listItemVariants}
-                        initial="hidden"
-                        animate="visible"
-                        whileHover={{
-                          x: 4,
-                          backgroundColor: 'hsl(var(--accent))',
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm rounded-md ${
-                          activeConversation === conversation.id
-                            ? 'bg-accent'
-                            : ''
-                        }`}
-                      >
-                        <Link href={`/chat/${conversation.id}`} className="block w-full">
-                          <div className="overflow-hidden">
-                            <div className="truncate">{conversation.title}</div>
-                          </div>
-                        </Link>
-                      </motion.button>
-                    ))}
+            
+              <Link href="/chat/history" className="block px-2 py-1.5 text-sm rounded-md hover:bg-accent">
+                <div className="flex items-center">
+                  <History className="w-4 h-4 mr-2" />
+                  Recent Conversations
+                </div>
+              </Link>
 
-                    {conversationHistory.length > 5 && (
-                      <motion.button
-                        whileHover={{ x: 4 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={viewAllConversations}
-                        className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-md"
-                      >
-                        <span>View all conversations...</span>
-                      </motion.button>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="px-4 py-1">
+              <div className="px-2 py-1"> 
                 {isYouTubeConnected ? (
                   <div>
-                    <div className="flex items-center justify-between">
-                       <div className="flex items-center flex-grow">
-                         <YouTubeIcon className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
-                         <CollapsibleSectionHeader
-                           title="YouTube"
-                           isExpanded={isYouTubeSectionVisible}
-                           onToggle={() => setIsYouTubeSectionVisible(!isYouTubeSectionVisible)}
-                           className="flex-grow p-0"
-                         />
-                       </div>
-                    </div>
-                    <AnimatePresence>
-                      {isYouTubeSectionVisible && (
-                        <motion.div
-                          key="youtube-content"
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: 'easeInOut' }}
-                          className="pl-6 mt-1 space-y-1 overflow-hidden"
-                        >
-                          <p className="text-xs text-muted-foreground">YouTube options here...</p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <Link href="/youtube" className="block w-full py-1.5 text-sm rounded-md hover:bg-accent">
+                      <div className="flex items-center">
+                        <YouTubeIcon className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
+                        <span>YouTube</span>
+                      </div>
+                    </Link>
                   </div>
                 ) : (
                   <ConnectYouTubeButton variant="full" />
@@ -323,17 +253,19 @@ export const SideNav = () => {
 
               <div className="px-2">
                 {isYouTubeConnected ? (
-                  <motion.button
-                    className="p-2 rounded-md"
-                    aria-label="YouTube Options"
+                  <Link href="/youtube" passHref>
+                    <motion.button
+                      className="p-2 rounded-md"
+                      aria-label="YouTube Options"
                     whileHover={{
                       scale: 1.1,
                       backgroundColor: 'hsl(var(--accent))',
                     }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <YouTubeIcon className="w-5 h-5" />
-                  </motion.button>
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <YouTubeIcon className="w-5 h-5" />
+                    </motion.button>
+                  </Link>
                 ) : (
                   <ConnectYouTubeButton variant="icon" />
                 )}

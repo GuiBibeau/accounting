@@ -1,14 +1,9 @@
-import { SideNav } from './SideNav';
+import React from 'react';
 
 export default function ChatLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <SideNav />
-      {children}
-    </div>
-  );
+  return <>{children}</>; 
 }
