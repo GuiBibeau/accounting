@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { CollapsibleSectionHeader } from '@/components/ui/CollapsibleSectionHeader'; 
 const sidebarVariants = {
   expanded: {
     width: '200px',
@@ -72,6 +73,7 @@ const fadeIn = {
 
 export const SideNav = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [isConversationListVisible, setIsConversationListVisible] = useState(true);
   const [activeConversation] = useState<string | null>(null);
   const [conversationHistory, setConversationHistory] = useState<
     Conversation[]
@@ -188,52 +190,65 @@ export const SideNav = () => {
               animate="visible"
               exit="exit"
               variants={fadeIn}
-              className="space-y-4"
+              className="space-y-2"
             >
-              <div className="px-4">
-                <h2 className="font-medium text-sm text-muted-foreground">
-                  Recent Conversations
-                </h2>
-              </div>
+              <CollapsibleSectionHeader
+                title="Recent Conversations"
+                isExpanded={isConversationListVisible}
+                onToggle={() => setIsConversationListVisible(!isConversationListVisible)}
+                className="px-4" 
+              />
 
-              <div className="space-y-1">
-                {conversationHistory.slice(0, 5).map((conversation, index) => (
-                  <motion.button
-                    key={conversation.id}
-                    custom={index}
-                    variants={listItemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    whileHover={{
-                      x: 4,
-                      backgroundColor: 'hsl(var(--accent))',
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm rounded-md ${
-                      activeConversation === conversation.id
-                        ? 'bg-accent'
-                        : ''
-                    }`}
+\
+              <AnimatePresence>
+                {isConversationListVisible && (
+                  <motion.div
+                    key="conversation-list"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="space-y-1 overflow-hidden"
                   >
-                    <Link href={`/chat/${conversation.id}`} className="block w-full">
-                      <div className="overflow-hidden">
-                        <div className="truncate">{conversation.title}</div>
-                      </div>
-                    </Link>
-                  </motion.button>
-                ))}
+                    {conversationHistory.slice(0, 5).map((conversation, index) => (
+                      <motion.button
+                        key={conversation.id}
+                        custom={index}
+                        variants={listItemVariants}
+                        initial="hidden"
+                        animate="visible"
+                        whileHover={{
+                          x: 4,
+                          backgroundColor: 'hsl(var(--accent))',
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm rounded-md ${
+                          activeConversation === conversation.id
+                            ? 'bg-accent'
+                            : ''
+                        }`}
+                      >
+                        <Link href={`/chat/${conversation.id}`} className="block w-full">
+                          <div className="overflow-hidden">
+                            <div className="truncate">{conversation.title}</div>
+                          </div>
+                        </Link>
+                      </motion.button>
+                    ))}
 
-                {conversationHistory.length > 5 && (
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={viewAllConversations}
-                    className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-md"
-                  >
-                    <span>View all conversations...</span>
-                  </motion.button>
+                    {conversationHistory.length > 5 && (
+                      <motion.button
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={viewAllConversations}
+                        className="w-full text-left flex items-center mx-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-md"
+                      >
+                        <span>View all conversations...</span>
+                      </motion.button>
+                    )}
+                  </motion.div>
                 )}
-              </div>
+              </AnimatePresence>
             </motion.div>
           ) : (
             // Collapsed view - Show home and history icons
