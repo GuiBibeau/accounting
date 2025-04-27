@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
 import { adminAuth } from '@/lib/firebase-admin';
+import { config } from '@/lib/config';
 
 /** YouTube API scopes required for the application */
 const SCOPES = [
@@ -39,18 +40,20 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
-
-  if (!clientId || !clientSecret || !redirectUri) {
+  if (!config.hasGoogleCredentials()) {
+    console.error('Missing Google OAuth Client ID or Secret in config');
     return NextResponse.json(
-      { error: 'Server configuration error: Missing Google OAuth credentials.' },
+      { error: 'Server configuration error: Missing Google OAuth credentials' },
       { status: 500 },
     );
   }
 
-  const oauthClient = new OAuth2Client(clientId, clientSecret, redirectUri);
+  const oauthClient = new OAuth2Client(
+    config.googleClientId,
+    config.googleClientSecret,
+    config.googleRedirectUri
+  );
+
   const authorizationUrl = oauthClient.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
