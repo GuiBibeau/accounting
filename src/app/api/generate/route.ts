@@ -14,8 +14,6 @@ interface RequestBody {
   stream?: boolean;
 }
 
-export const runtime = 'edge';
-
 export async function POST(req: NextRequest) {
   let requestBody: RequestBody;
   try {

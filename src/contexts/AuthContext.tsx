@@ -13,7 +13,7 @@ import { User, onAuthStateChanged, UserCredential } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { authService, AuthError } from "@/lib/auth.service";
 import { hasCompanyAssociation } from "@/lib/user";
-import { doc, getDoc, onSnapshot, Unsubscribe } from "firebase/firestore";
+import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
 
 interface AuthContextProps {
   user: User | null;

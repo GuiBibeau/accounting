@@ -23,7 +23,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { CollapsibleSectionHeader } from '@/components/ui/CollapsibleSectionHeader';
 import { ConnectYouTubeButton } from '@/components/ConnectYouTubeButton';
 import { YouTubeIcon } from '@/components/icons/YouTube';
 
@@ -46,18 +45,6 @@ const sidebarVariants = {
   },
 };
 
-const listItemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.05,
-      duration: 0.3,
-    },
-  }),
-};
-
 const fadeIn = {
   hidden: { opacity: 0 },
   visible: {
@@ -73,13 +60,9 @@ const fadeIn = {
     },
   },
 };
-
 export const SideNav = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [activeConversation] = useState<string | null>(null);
-  const [conversationHistory, setConversationHistory] = useState<
-    Conversation[]
-  >([]);
+  const [, setConversationHistory] = useState<Conversation[]>([]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -113,7 +96,6 @@ export const SideNav = () => {
     setSidebarExpanded(!sidebarExpanded);
   };
 
-  const viewAllConversations = () => {};
   return (
     <motion.div
       className="border-r border-border flex flex-col relative bg-background text-foreground"

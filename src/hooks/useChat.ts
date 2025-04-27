@@ -172,7 +172,7 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
       }
       return undefined;
     },
-    [api, messages, isLoading, initialBody, onResponse, onFinish, onError]
+    [api, messages, isLoading, initialBody, onResponse, onFinish, onError, options.systemPrompt]
   );
 
 
@@ -283,7 +283,7 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
         setIsLoading(false);
     }
     return undefined;
-  }, [api, messages, isLoading, initialBody, onResponse, onFinish, onError]);
+  }, [api, messages, isLoading, initialBody, onResponse, onFinish, onError, options.systemPrompt]);
 
   const stop = useCallback(() => {
     console.warn('stop() is not fully implemented yet.');

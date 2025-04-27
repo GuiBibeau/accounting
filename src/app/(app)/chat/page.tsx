@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { Code2 } from 'lucide-react';
-import { ConnectYouTubeButton } from '@/components/ConnectYouTubeButton'; // Import the button
 
 import { LandingChatInput } from './LandingChatInput';
 

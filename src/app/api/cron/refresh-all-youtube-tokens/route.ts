@@ -3,8 +3,6 @@ import { adminDb } from '@/lib/firebase-admin';
 import { YouTubeCredentials } from '@/lib/youtube'; // Import correct interface
 import { decrypt } from '@/lib/encryption'; // Import decrypt function
 
-export const runtime = 'edge';
-
 /**
  * Generates the Firestore path for a user's YouTube credentials.
  * @param userId - The ID of the user.
