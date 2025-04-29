@@ -55,10 +55,10 @@ const YouTubePage = () => {
 
   if (!user) {
      return <div className="p-4 text-center">Please log in to manage YouTube videos.</div>;
-  }
+   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-6"> {/* Added flex classes */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">YouTube Management</h1>
         {view === 'grid' && (

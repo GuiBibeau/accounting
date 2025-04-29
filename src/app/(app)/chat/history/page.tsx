@@ -44,7 +44,7 @@ export default function ConversationHistoryPage() {
   }, [user]); 
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="flex flex-col flex-1 overflow-y-auto p-4"> {/* Added flex classes */}
       <h1 className="text-2xl font-bold mb-4">Conversation History</h1>
 
       {loading && <p>Loading history...</p>}
