@@ -12,6 +12,17 @@ service cloud.firestore {
     // Make sure to write security rules for your app before that time, or else
     // all client requests to your Firestore database will be denied until you Update
     // your rules
+
+    // Rules for the new 'videos' collection
+    match /videos/{videoId} {
+      // Allow creation if user is authenticated and the userId in the document matches their UID
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow read, update, delete if user is authenticated and owns the document
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Add specific field validation for update if needed later
+    }
+
+    // Keep the temporary rule for other documents until more specific rules are added
     match /{document=**} {
       allow read, write: if request.time < timestamp.date(2025, 5, 13);
     }
