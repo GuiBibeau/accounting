@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext'; 
+import { useAuth } from '@/contexts/AuthContext';
+import { SiteHeader } from '@/components/site-header'; 
 import {
   getAllUserConversations,
   type Conversation,
@@ -41,14 +42,15 @@ export default function ConversationHistoryPage() {
     } else {
       setLoading(false);
     }
-  }, [user]); 
+  }, [user]);
 
   return (
-    <div className="flex flex-col flex-1 overflow-y-auto p-4"> {/* Added flex classes */}
-      <h1 className="text-2xl font-bold mb-4">Conversation History</h1>
+    <> 
+      <SiteHeader title="Conversation History" /> 
+      <div className="flex flex-col flex-1 overflow-y-auto p-4 lg:p-6"> 
 
-      {loading && <p>Loading history...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+        {loading && <p>Loading history...</p>}
+        {error && <p className="text-red-500">{error}</p>}
 
       {!loading && !error && conversations.length === 0 && (
         <p>No conversations found.</p>
@@ -77,6 +79,7 @@ export default function ConversationHistoryPage() {
           </TableBody>
         </Table>
       )}
-    </div>
+      </div>
+    </>
   );
 }

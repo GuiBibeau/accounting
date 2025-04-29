@@ -7,8 +7,9 @@ import { getMessages, saveMessage } from '@/lib/messages';
 import { useChat, type Message } from '@/hooks/useChat';
 import { useUser } from '@/contexts/AuthContext';
 import { systemPrompt } from '@/lib/system-prompt';
+import { SiteHeader } from '@/components/site-header'; 
 import { ChatInput } from './ChatInput';
-import { AssistantMessage } from './AssistantMessage'; 
+import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
 
 export default function ChatPage() {
@@ -80,6 +81,7 @@ export default function ChatPage() {
 
   return (
     <>
+      <SiteHeader title="Chat" /> 
       <div className="flex-1 overflow-y-auto p-4 relative">
         <div className="max-w-4xl mx-auto">
           {messages.map((message, index) => (

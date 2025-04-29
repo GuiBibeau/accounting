@@ -4,6 +4,7 @@ import React, { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { handleOnboarding, OnboardingData, CompanyRole } from '@/lib/company';
+import { SiteHeader } from '@/components/site-header'; 
 import TypeSelection from './TypeSelection';
 import OnboardingForm from './OnboardingForm';
 
@@ -78,20 +79,23 @@ export default function OnboardingClient() {
 
   return (
     <>
-      {step === 'type' ? (
-        <TypeSelection onSelectType={handleTypeSelect} />
-      ) : (
-        <OnboardingForm
-          formData={formData}
-          userType={userType}
-          isLoading={isLoading}
-          error={error}
-          handleChange={handleChange}
-          handleSelectChange={handleSelectChange}
-          handleSubmit={handleSubmit}
-          onBack={() => setStep('type')}
-        />
-      )}
+      <SiteHeader title="Onboarding" /> 
+      <div className="p-4 lg:p-6"> 
+        {step === 'type' ? (
+          <TypeSelection onSelectType={handleTypeSelect} />
+        ) : (
+          <OnboardingForm
+            formData={formData}
+            userType={userType}
+            isLoading={isLoading}
+            error={error}
+            handleChange={handleChange}
+            handleSelectChange={handleSelectChange}
+            handleSubmit={handleSubmit}
+            onBack={() => setStep('type')}
+          />
+        )}
+      </div>
     </>
   );
 }

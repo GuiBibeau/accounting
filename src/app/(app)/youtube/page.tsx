@@ -3,15 +3,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { VideoUploadForm } from '@/components/youtube/VideoUploadForm';
-import { VideoGrid } from '@/components/youtube/VideoGrid'; // Import VideoGrid
-import { getUserVideos, type VideoMetadata } from '@/lib/video'; // Import fetch function and type
-import { Button } from '@/components/ui/button'; // For "Upload New Video" button
+import { VideoGrid } from '@/components/youtube/VideoGrid';
+import { getUserVideos, type VideoMetadata } from '@/lib/video';
+import { Button } from '@/components/ui/button';
+import { SiteHeader } from '@/components/site-header'; 
 
 type ViewState = 'grid' | 'upload';
 
 const YouTubePage = () => {
   const { user, loading: authLoading } = useAuth();
-  const [view, setView] = useState<ViewState>('grid'); // Default to grid view
+  const [view, setView] = useState<ViewState>('grid'); 
   const [videos, setVideos] = useState<VideoMetadata[]>([]);
   const [videosLoading, setVideosLoading] = useState<boolean>(true);
   const [videosError, setVideosError] = useState<string | null>(null);
@@ -57,30 +58,31 @@ const YouTubePage = () => {
      return <div className="p-4 text-center">Please log in to manage YouTube videos.</div>;
    }
 
+  const headerActions = view === 'grid' ? (
+    <Button onClick={() => setView('upload')} size="sm">Upload New Video</Button>
+  ) : ( // view === 'upload'
+    <Button variant="outline" onClick={() => setView('grid')} size="sm">Cancel Upload</Button>
+  );
+
   return (
-    <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-6"> {/* Added flex classes */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">YouTube Management</h1>
+    <> 
+      <SiteHeader title="YouTube Management" actions={headerActions} />
+      <div className="flex flex-col flex-1 overflow-y-auto p-4 lg:p-6 space-y-6"> 
+
+        {view === 'upload' && (
+          <>
+            <div className="flex justify-center items-start pt-10">
+              <VideoUploadForm onUploadComplete={handleUploadComplete} />
+            </div>
+          </>
+        )}
+
         {view === 'grid' && (
-           <Button onClick={() => setView('upload')}>Upload New Video</Button>
+          <VideoGrid videos={videos} isLoading={videosLoading} error={videosError} />
         )}
-         {view === 'upload' && (
-           <Button variant="outline" onClick={() => setView('grid')}>Cancel Upload</Button>
-        )}
+
       </div>
-
-      {view === 'upload' && (
-        // Center the upload form
-        <div className="flex justify-center items-start pt-10">
-          <VideoUploadForm onUploadComplete={handleUploadComplete} />
-        </div>
-      )}
-
-      {view === 'grid' && (
-        <VideoGrid videos={videos} isLoading={videosLoading} error={videosError} />
-      )}
-
-    </div>
+    </>
   );
 };
 

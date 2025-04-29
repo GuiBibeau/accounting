@@ -1,20 +1,17 @@
 'use client';
 
+import * as React from 'react'; 
 import Image from 'next/image';
-import { Code2 } from 'lucide-react';
-
+import { SiteHeader } from '@/components/site-header'; 
 import { LandingChatInput } from './LandingChatInput';
 
 export default function Home() {
   return (
-    <div className="flex-1 overflow-hidden flex flex-col">
-      <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 overflow-auto">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-center text-primary mb-6 sm:mb-8 flex items-center justify-center">
-              relation.dev
-              <Code2 className="w-5 h-5 ml-2 text-primary" />
-            </h1>
+    <> 
+      <SiteHeader title="Chat" /> 
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 overflow-auto">
 
-            {/* Action Buttons */}
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
               {[
                 {
@@ -194,7 +191,8 @@ export default function Home() {
                 </div>
               ))}
             </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 }
