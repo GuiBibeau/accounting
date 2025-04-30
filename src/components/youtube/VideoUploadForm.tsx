@@ -1,31 +1,29 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react'; // Removed useContext
-import { useAuth } from '@/contexts/AuthContext'; // Import useAuth hook
+import React, { useState, useRef, useCallback } from 'react'; 
+import { useAuth } from '@/contexts/AuthContext'; 
 import { uploadVideoToStorage, createVideoRecord } from '@/lib/video';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// Removed Card imports
 
 type UploadStep = 'select' | 'uploading' | 'uploaded';
 
-/** Props for the VideoUploadForm */
 type VideoUploadFormProps = {
-  onUploadComplete: () => void; // Callback when upload is finished and user clicks 'Done'
+  onUploadComplete: () => void; 
 };
 
 /**
  * A multi-step form component for uploading videos.
  */
 export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
-  const { user } = useAuth(); // Use the useAuth hook
+  const { user } = useAuth(); 
   const [step, setStep] = useState<UploadStep>('select');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref for the file input
+  const fileInputRef = useRef<HTMLInputElement>(null); 
 
   const resetForm = () => {
     setSelectedFile(null);
@@ -34,7 +32,7 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
     setError(null);
     setStep('select');
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''; // Reset file input
+      fileInputRef.current.value = '';
     }
   };
 
@@ -88,43 +86,37 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
         },
       );
 
-      setStatusMessage('Finalizing...'); // Indicate record creation
+      setStatusMessage('Finalizing...'); 
 
       await createVideoRecord({
         userId: user.uid,
         storagePath,
         fileName,
         contentType,
-        status: 'uploaded_to_storage', // Initial status after upload
+        status: 'uploaded_to_storage',
       });
 
       setStatusMessage(`Successfully uploaded ${fileName}!`);
-      setStep('uploaded'); // Move to uploaded step
-      // Don't reset file input here, wait for 'Done'
+      setStep('uploaded'); 
+
     } catch (err: any) {
       console.error('Upload process failed:', err);
       setError(`Upload failed: ${err.message || 'Unknown error'}`);
-      setStatusMessage(''); // Clear status on error
-      setStep('select'); // Go back to select on error
+      setStatusMessage(''); 
+      setStep('select'); 
     }
-    // No finally block needed for setIsUploading as we use 'step' state now
   }, [selectedFile, user]);
 
   const handleDone = () => {
-    resetForm(); // Reset the form state
-    onUploadComplete(); // Call the callback to switch view
+    resetForm(); 
+    onUploadComplete(); 
   };
 
   return (
-    <div className="space-y-4"> {/* Replaced Card with a div and added spacing */}
-        {/* Removed CardHeader */}
-        {/* Removed CardTitle - Title is now in DialogHeader */}
-        {/* Removed CardDescription - Can be added back if needed, or handled by DialogDescription */}
-
-        {/* Content starts here, removed CardContent */}
+    <div className="space-y-4">
         {/* Step 1: Select File */}
         {step === 'select' && (
-          <div className="space-y-4"> {/* Added wrapper for spacing */}
+          <div className="space-y-4"> 
             <div className="grid w-full items-center gap-1.5">
               <Label htmlFor="video-upload">Video File</Label>
               <Input
@@ -166,8 +158,7 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
         {/* Error Display */}
         {error && <p className="text-sm text-red-600 text-center pt-2">{error}</p>}
 
-      {/* Removed CardContent */}
-      <div className="flex justify-end pt-4"> {/* Replaced CardFooter with a div and added padding */}
+      <div className="flex justify-end pt-4"> 
          {step === 'select' && (
            <Button
              onClick={handleUpload}
@@ -187,6 +178,6 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
            </Button>
          )}
       </div>
-    </div> // Close the main div wrapper
+    </div> 
   );
 }

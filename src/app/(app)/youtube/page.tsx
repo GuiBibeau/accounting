@@ -37,21 +37,18 @@ const YouTubePage = () => {
     } finally {
       setVideosLoading(false);
     }
-  }, [user?.uid]); // Dependency on user ID
+  }, [user?.uid]); 
 
-  // Fetch videos when the component mounts or user changes
   useEffect(() => {
     if (user?.uid) {
       fetchVideos();
     } else {
-      // Clear videos if user logs out
       setVideos([]);
       setVideosLoading(false);
       setVideosError(null);
     }
-  }, [user?.uid, fetchVideos]); // Dependency on user ID
+  }, [user?.uid, fetchVideos]); 
 
-  // Fetch videos when the component mounts or user changes
   useEffect(() => {
     if (user?.uid) {
       fetchVideos();
