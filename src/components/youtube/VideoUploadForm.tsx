@@ -6,7 +6,7 @@ import { uploadVideoToStorage, createVideoRecord } from '@/lib/video';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'; // Added CardDescription, CardFooter
+// Removed Card imports
 
 type UploadStep = 'select' | 'uploading' | 'uploaded';
 
@@ -116,17 +116,15 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Upload New Video</CardTitle>
-        {step === 'select' && <CardDescription>Select a video file from your device.</CardDescription>}
-        {step === 'uploading' && <CardDescription>Your video is uploading...</CardDescription>}
-        {step === 'uploaded' && <CardDescription>Upload complete!</CardDescription>}
-      </CardHeader>
-      <CardContent className="space-y-4 min-h-[150px] flex flex-col justify-center">
+    <div className="space-y-4"> {/* Replaced Card with a div and added spacing */}
+        {/* Removed CardHeader */}
+        {/* Removed CardTitle - Title is now in DialogHeader */}
+        {/* Removed CardDescription - Can be added back if needed, or handled by DialogDescription */}
+
+        {/* Content starts here, removed CardContent */}
         {/* Step 1: Select File */}
         {step === 'select' && (
-          <>
+          <div className="space-y-4"> {/* Added wrapper for spacing */}
             <div className="grid w-full items-center gap-1.5">
               <Label htmlFor="video-upload">Video File</Label>
               <Input
@@ -140,7 +138,7 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
             {statusMessage && !error && (
               <p className="text-sm text-muted-foreground">{statusMessage}</p>
             )}
-          </>
+          </div>
         )}
 
         {/* Step 2: Uploading */}
@@ -168,8 +166,8 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
         {/* Error Display */}
         {error && <p className="text-sm text-red-600 text-center pt-2">{error}</p>}
 
-      </CardContent>
-      <CardFooter className="flex justify-end">
+      {/* Removed CardContent */}
+      <div className="flex justify-end pt-4"> {/* Replaced CardFooter with a div and added padding */}
          {step === 'select' && (
            <Button
              onClick={handleUpload}
@@ -188,7 +186,7 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
              Done
            </Button>
          )}
-      </CardFooter>
-    </Card>
+      </div>
+    </div> // Close the main div wrapper
   );
 }
