@@ -36,6 +36,8 @@ export type VideoMetadata = {
   description?: string; // User-defined or generated description
   audioStoragePath?: string; // Path to the extracted audio in Storage
   audioProcessingStatus?: 'pending' | 'processing' | 'completed' | 'failed'; // Status of audio extraction
+  transcript?: string; // Generated transcript text
+  transcriptionStatus?: 'pending' | 'processing' | 'completed' | 'failed'; // Status of transcription
   // Add other relevant fields like duration, thumbnails, etc. later
 };
 

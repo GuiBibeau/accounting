@@ -3,7 +3,6 @@
 import React from 'react';
 import { VideoMetadata } from '@/lib/video';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-// Removed date-fns import
 
 /** Props for the VideoGrid */
 type VideoGridProps = {
@@ -25,7 +24,7 @@ export function VideoGrid({ videos, isLoading, error }: VideoGridProps) {
   }
 
   if (videos.length === 0) {
-    return <div className="text-center p-4 text-muted-foreground">You haven't uploaded any videos yet.</div>;
+    return <div className="text-center p-4 text-muted-foreground">You haven&apos;t uploaded any videos yet.</div>;
   }
 
   return (
@@ -33,7 +32,6 @@ export function VideoGrid({ videos, isLoading, error }: VideoGridProps) {
       {videos.map((video) => (
         <Card key={video.id}>
           <CardHeader>
-            {/* Basic placeholder - ideally show a thumbnail */}
             <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center mb-2">
               <span className="text-muted-foreground text-sm">No Thumbnail</span>
             </div>
@@ -41,13 +39,11 @@ export function VideoGrid({ videos, isLoading, error }: VideoGridProps) {
               {video.fileName}
             </CardTitle>
             <CardDescription className="text-xs">
-              {/* Use vanilla JS Date formatting */}
               Uploaded: {video.createdAt.toDate().toLocaleString()}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">Status: {video.status.replace(/_/g, ' ')}</p>
-            {/* Add more details or actions later */}
           </CardContent>
         </Card>
       ))}
