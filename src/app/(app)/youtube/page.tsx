@@ -31,9 +31,10 @@ const YouTubePage = () => {
     try {
       const userVideos = await getUserVideos(user.uid);
       setVideos(userVideos);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to fetch videos:", err);
-      setVideosError(err.message || 'Could not load videos.');
+      const errorMessage = err instanceof Error ? err.message : 'Could not load videos.';
+      setVideosError(errorMessage);
     } finally {
       setVideosLoading(false);
     }
@@ -53,7 +54,6 @@ const YouTubePage = () => {
     if (user?.uid) {
       fetchVideos();
     } else {
-      // Clear videos if user logs out
       setVideos([]);
       setVideosLoading(false);
       setVideosError(null);
@@ -61,8 +61,8 @@ const YouTubePage = () => {
   }, [user?.uid, fetchVideos]);
 
   const handleUploadComplete = () => {
-    setIsUploadModalOpen(false); // Close the modal
-    fetchVideos(); // Refresh the video list
+    setIsUploadModalOpen(false);
+    fetchVideos();
   };
 
   if (authLoading) {

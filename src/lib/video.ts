@@ -1,12 +1,9 @@
 import {
-  getStorage,
   ref,
   uploadBytesResumable,
-  getDownloadURL,
   type UploadTaskSnapshot,
 } from 'firebase/storage';
 import {
-  getFirestore,
   collection,
   addDoc,
   serverTimestamp,

@@ -97,13 +97,14 @@ export function VideoUploadForm({ onUploadComplete }: VideoUploadFormProps) {
       });
 
       setStatusMessage(`Successfully uploaded ${fileName}!`);
-      setStep('uploaded'); 
+      setStep('uploaded');
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Upload process failed:', err);
-      setError(`Upload failed: ${err.message || 'Unknown error'}`);
-      setStatusMessage(''); 
-      setStep('select'); 
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Upload failed: ${errorMessage}`);
+      setStatusMessage('');
+      setStep('select');
     }
   }, [selectedFile, user]);
 
