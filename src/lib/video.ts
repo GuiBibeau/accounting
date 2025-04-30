@@ -34,6 +34,8 @@ export type VideoMetadata = {
   youtubeVideoId?: string; // ID after successful YouTube upload
   title?: string; // User-defined or generated title
   description?: string; // User-defined or generated description
+  audioStoragePath?: string; // Path to the extracted audio in Storage
+  audioProcessingStatus?: 'pending' | 'processing' | 'completed' | 'failed'; // Status of audio extraction
   // Add other relevant fields like duration, thumbnails, etc. later
 };
 
@@ -59,8 +61,8 @@ export async function uploadVideoToStorage(
   }
 
   const uniqueVideoId = crypto.randomUUID(); // Use built-in crypto for unique ID
-  const fileExtension = file.name.split('.').pop() || '';
-  const storagePath = `videos/${userId}/${uniqueVideoId}${fileExtension ? '.' + fileExtension : ''}`;
+  // New path structure: {userId}/{videoId}/{filename}
+  const storagePath = `${userId}/${uniqueVideoId}/${file.name}`;
   const storageRef = ref(storage, storagePath);
 
   console.log(`Uploading video to: ${storagePath}`);
