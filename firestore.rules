@@ -24,7 +24,7 @@ service cloud.firestore {
 
     // Keep the temporary rule for other documents until more specific rules are added
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 5, 13);
+      allow read, write: if request.time < timestamp.date(2025, 6, 19);
     }
   }
 }
