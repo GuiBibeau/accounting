@@ -9,15 +9,21 @@ const AUTH_TAG_LENGTH = 16;
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
-if (!ENCRYPTION_KEY || Buffer.from(ENCRYPTION_KEY, 'utf-8').length !== 32) {
-  throw new Error('ENCRYPTION_KEY environment variable is missing or not 32 bytes long.');
+if (
+  !ENCRYPTION_KEY ||
+  ENCRYPTION_KEY.length !== 64 ||
+  !/^[0-9a-fA-F]+$/.test(ENCRYPTION_KEY)
+) {
+  throw new Error(
+    'ENCRYPTION_KEY environment variable is missing, not 64 characters long, or not a valid hex string.'
+  );
 }
 
-const key = Buffer.from(ENCRYPTION_KEY, 'utf-8');
+const key = Buffer.from(ENCRYPTION_KEY, 'hex');
 
 /**
  * Encrypts text using AES-256-GCM.
- * 
+ *
  * @param {string} text - The plaintext to encrypt
  * @returns {string} Base64 encoded string containing IV, auth tag, and ciphertext
  * @throws {Error} If encryption fails
@@ -31,13 +37,13 @@ export function encrypt(text: string): string {
 
   const authTag = cipher.getAuthTag();
   const buffer = Buffer.concat([iv, authTag, Buffer.from(encrypted, 'hex')]);
-  
+
   return buffer.toString('base64');
 }
 
 /**
  * Decrypts text encrypted with AES-256-GCM.
- * 
+ *
  * @param {string} encryptedData - Base64 encoded string containing IV, auth tag, and ciphertext
  * @returns {string} The original decrypted text
  * @throws {Error} If decryption fails (wrong key, tampered data, etc.)

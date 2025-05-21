@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 type SiteHeaderProps = {
   title: string;
   actions?: React.ReactNode;
+  lastSyncedAt?: string | null;
 };
 
 /**
@@ -14,7 +15,7 @@ type SiteHeaderProps = {
  * @param {string} props.title - The title to display in the header.
  * @param {React.ReactNode} [props.actions] - Optional React node(s) for action buttons/elements on the right side.
  */
-export function SiteHeader({ title, actions }: SiteHeaderProps) {
+export function SiteHeader({ title, actions, lastSyncedAt }: SiteHeaderProps) {
   return (
     <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b px-4 lg:px-6">
       <SidebarTrigger className="-ml-1" />
@@ -22,11 +23,16 @@ export function SiteHeader({ title, actions }: SiteHeaderProps) {
         orientation="vertical"
         className="mx-2 h-4" // Simplified class, assuming h-4 is sufficient
       />
-      <h1 className="text-base font-medium">{title}</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-base font-medium">{title}</h1>
+        {lastSyncedAt && (
+          <span className="text-xs text-muted-foreground">
+            (Synced: {lastSyncedAt})
+          </span>
+        )}
+      </div>
       {actions && (
-        <div className="ml-auto flex items-center gap-2">
-          {actions}
-        </div>
+        <div className="ml-auto flex items-center gap-2">{actions}</div>
       )}
     </header>
   );
