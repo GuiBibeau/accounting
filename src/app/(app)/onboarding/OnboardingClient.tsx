@@ -1,18 +1,25 @@
-"use client";
+'use client';
 
 import React, { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { handleOnboarding, OnboardingData, CompanyRole } from '@/lib/company';
-import { SiteHeader } from '@/components/site-header'; 
 import TypeSelection from './TypeSelection';
 import OnboardingForm from './OnboardingForm';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function OnboardingClient() {
   const { user } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState<'type' | 'form'>('type');
-  const [userType, setUserType] = useState<'freelancer' | 'company'>('freelancer');
+  const [userType, setUserType] = useState<'freelancer' | 'company'>(
+    'freelancer'
+  );
   const [formData, setFormData] = useState<Omit<OnboardingData, ''>>({
     fullName: '',
     role: 'solo owner',
@@ -20,25 +27,27 @@ export default function OnboardingClient() {
     companyName: '',
     companyField: '',
     isFreelancer: true,
-    freelancerIndustry: ''
+    freelancerIndustry: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTypeSelect = (type: 'freelancer' | 'company') => {
     setUserType(type);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      isFreelancer: type === 'freelancer'
+      isFreelancer: type === 'freelancer',
     }));
     setStep('form');
   };
@@ -46,17 +55,20 @@ export default function OnboardingClient() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
-      setError("User not authenticated. Please log in again.");
+      setError('User not authenticated. Please log in again.');
       return;
     }
-    
+
     if (!formData.fullName) {
-      setError("Name is required.");
+      setError('Name is required.');
       return;
     }
-    
-    if (!formData.isFreelancer && (!formData.companyName || !formData.companySize || !formData.companyField)) {
-      setError("Company details are required.");
+
+    if (
+      !formData.isFreelancer &&
+      (!formData.companyName || !formData.companySize || !formData.companyField)
+    ) {
+      setError('Company details are required.');
       return;
     }
 
@@ -71,31 +83,44 @@ export default function OnboardingClient() {
       await handleOnboarding(user, onboardingPayload);
       router.push('/chat');
     } catch (err) {
-      console.error("Onboarding failed:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred during onboarding.");
+      console.error('Onboarding failed:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred during onboarding.'
+      );
       setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <SiteHeader title="Onboarding" /> 
-      <div className="p-4 lg:p-6"> 
-        {step === 'type' ? (
-          <TypeSelection onSelectType={handleTypeSelect} />
-        ) : (
-          <OnboardingForm
-            formData={formData}
-            userType={userType}
-            isLoading={isLoading}
-            error={error}
-            handleChange={handleChange}
-            handleSelectChange={handleSelectChange}
-            handleSubmit={handleSubmit}
-            onBack={() => setStep('type')}
-          />
-        )}
-      </div>
-    </>
+    <Dialog open={true}>
+      <DialogContent
+        className="onboarding-dialog-content sm:max-w-md"
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
+        <DialogHeader>
+          <DialogTitle>Welcome! Let's get you set up.</DialogTitle>
+        </DialogHeader>
+
+        <div className="mt-4">
+          {step === 'type' ? (
+            <TypeSelection onSelectType={handleTypeSelect} />
+          ) : (
+            <OnboardingForm
+              formData={formData}
+              userType={userType}
+              isLoading={isLoading}
+              error={error}
+              handleChange={handleChange}
+              handleSelectChange={handleSelectChange}
+              handleSubmit={handleSubmit}
+              onBack={() => setStep('type')}
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

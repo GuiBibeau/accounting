@@ -174,3 +174,7 @@
   border-radius: 0.75rem;
   overflow: hidden;
 }
+
+.onboarding-dialog-content > button[data-slot="dialog-close"] {
+  display: none;
+}

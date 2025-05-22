@@ -2,27 +2,40 @@
 
 ## Current Focus
 
-The current focus is on enhancing the YouTube management page by displaying the last synchronization time. This involves fetching data from Firestore and updating UI components.
+The primary focus was implementing a grid display for published YouTube videos on the `/youtube/channel` page. This involved fetching video data from Firestore and presenting it using Shadcn UI components.
 
 ## Recent Changes & Decisions
 
-- **YouTube Page Enhancement**: Added functionality to display the "last synced" time for a user's YouTube channel on the `/youtube` page.
-  - Created a new API route `src/app/api/youtube/channel-details/route.ts` to securely fetch the user's YouTube `channelId` using their ID token. This route uses `getChannelMetadata` from `src/lib/youtube.ts` (server-side).
-  - Modified `src/app/(app)/youtube/page.tsx`:
-    - It now calls the `/api/youtube/channel-details` API to get the `channelId`.
-    - Upon receiving the `channelId`, it fetches the `lastSyncedAt` timestamp from the Firestore document at `youtubeChannels/${channelId}/metadata/doc`.
-    - The timestamp is formatted using `toDate().toLocaleString()`.
-    - The `user.getIdToken()` method is used to obtain the Firebase ID token for authenticated API requests, correcting a previous assumption about `useAuth()` providing `getIdToken` directly.
-  - Updated `src/components/site-header.tsx`:
-    - The `SiteHeaderProps` type now includes an optional `lastSyncedAt?: string | null;` prop.
-    - The component now displays this timestamp next to the page title if provided, formatted as "(Synced: {lastSyncedAt})".
-- **Firebase Admin Auth**: Corrected the import in the new API route to use `adminAuth` from `@/lib/firebase-admin` instead of a non-existent `auth` export for verifying ID tokens.
-- **Timestamp Storage**: Confirmed that the `lastSyncedAt` timestamp is stored in Firestore by the `syncYoutubeDataForCloudFunction` in `functions/src/lib/youtube-cf.ts` at the path `youtubeChannels/{channelId}/metadata/doc`.
+- **Published YouTube Videos Grid**: Added functionality to display a grid of a user's published YouTube videos.
+  - Created `src/components/youtube/YouTubeVideoCard.tsx`:
+    - Displays a single video's thumbnail, title, publication date, and stats (views, likes, comments).
+    - Uses `next/image` for optimized thumbnail display.
+    - Includes a helper function to format large numbers for stats (e.g., 1.2K, 1.5M).
+    - Defines `YouTubeVideoDetails` type for the video data it expects.
+  - Created `src/components/youtube/PublishedVideosGrid.tsx`:
+    - Renders a responsive grid of `YouTubeVideoCard` components.
+    - Handles loading, error, and empty states.
+  - Modified `src/app/(app)/youtube/channel/page.tsx`:
+    - Integrated `PublishedVideosGrid` to display videos.
+    - Implemented `fetchPublishedVideos` function to:
+      - Retrieve the user's Firebase ID token.
+      - Call the `/api/youtube/channel-details` API to get the `channelId`.
+      - Query the `youtubeChannels/{channelId}/videos` Firestore collection, ordering by `publishedAt` descending.
+      - Map Firestore documents to the `YouTubeVideoDetails` type.
+    - Updated component state to manage fetched videos, loading status, and errors.
+    - Corrected import for `YouTubeVideoDetails` type to point to `YouTubeVideoCard.tsx`.
+    - The page now focuses on displaying published YouTube videos from Firestore, replacing the previous logic that handled internally uploaded videos via `VideoGrid` and `getUserVideos`.
+- **Previous - YouTube Page Enhancement (Last Synced Time)**:
+  - Created `src/app/api/youtube/channel-details/route.ts` to fetch `channelId`.
+  - `src/app/(app)/youtube/page.tsx` was modified to use this API (though it now redirects to `/youtube/channel`).
+  - `src/components/site-header.tsx` updated to display `lastSyncedAt`.
+- **Previous - Firebase Admin Auth**: Corrected import in API route.
+- **Previous - Timestamp Storage**: Confirmed `lastSyncedAt` storage path.
 
 ## Next Steps
 
-1. Verify the "last synced" time display on the YouTube management page.
-2. Consider error handling and loading states for the "last synced" time display.
+1. Verify the "Published YouTube Videos" grid display on the `/youtube/channel` page.
+2. Consider any further UI/UX refinements for the video cards or grid.
 3. Update `progress.md` to reflect the completion of this feature.
 
 ## Active Considerations & Questions
