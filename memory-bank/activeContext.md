@@ -15,6 +15,11 @@ The primary focus was implementing a grid display for published YouTube videos o
   - Created `src/components/youtube/PublishedVideosGrid.tsx`:
     - Renders a responsive grid of `YouTubeVideoCard` components.
     - Handles loading, error, and empty states.
+    - Updated to use `PublishedVideosGridSkeleton` during loading.
+  - Created `src/components/youtube/YouTubeVideoCardSkeleton.tsx`:
+    - Provides a skeleton UI for a single video card.
+  - Created `src/components/youtube/PublishedVideosGridSkeleton.tsx`:
+    - Renders a grid of `YouTubeVideoCardSkeleton` components.
   - Modified `src/app/(app)/youtube/channel/page.tsx`:
     - Integrated `PublishedVideosGrid` to display videos.
     - Implemented `fetchPublishedVideos` function to:
@@ -34,9 +39,9 @@ The primary focus was implementing a grid display for published YouTube videos o
 
 ## Next Steps
 
-1. Verify the "Published YouTube Videos" grid display on the `/youtube/channel` page.
-2. Consider any further UI/UX refinements for the video cards or grid.
-3. Update `progress.md` to reflect the completion of this feature.
+1. Verify the "Published YouTube Videos" grid display and skeleton loader on the `/youtube/channel` page.
+2. Consider any further UI/UX refinements for the video cards, grid, or skeleton loader.
+3. Update `progress.md` to reflect the completion of the skeleton loader feature.
 
 ## Active Considerations & Questions
 
