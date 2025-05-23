@@ -1,5 +1,12 @@
 import { db } from './firebase';
-import { doc, getDoc, serverTimestamp, Timestamp, WriteBatch, setDoc } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  Timestamp,
+  WriteBatch,
+  setDoc,
+} from 'firebase/firestore';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 export interface UserProfile {
@@ -51,43 +58,45 @@ export const addUserProfileUpdateToBatch = (
  * @param details - Object containing details like currentCompanyId.
  */
 export const upsertUserProfile = async (
-    user: FirebaseUser,
-    details: { currentCompanyId: string }
+  user: FirebaseUser,
+  details: { currentCompanyId: string }
 ): Promise<void> => {
-    if (!user.uid || !user.email) {
-        throw new Error('User UID and email are required for profile update.');
-    }
-    const userRef = doc(db, 'users', user.uid);
-    const now = serverTimestamp();
-    const userProfileData: Partial<UserProfile> = {
-        currentCompanyId: details.currentCompanyId,
-        updatedAt: now as Timestamp,
-    };
-    await setDoc(userRef, userProfileData, { merge: true });
-}
-
+  if (!user.uid || !user.email) {
+    throw new Error('User UID and email are required for profile update.');
+  }
+  const userRef = doc(db, 'users', user.uid);
+  const now = serverTimestamp();
+  const userProfileData: Partial<UserProfile> = {
+    currentCompanyId: details.currentCompanyId,
+    updatedAt: now as Timestamp,
+  };
+  await setDoc(userRef, userProfileData, { merge: true });
+};
 
 /**
  * Fetches a user's profile from Firestore.
  * @param uid - The user's unique ID.
  * @returns The user profile data or null if not found.
  */
-export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
+export const getUserProfile = async (
+  uid: string
+): Promise<UserProfile | null> => {
   const userRef = doc(db, 'users', uid);
   const docSnap = await getDoc(userRef);
   if (docSnap.exists()) {
     const data = docSnap.data();
     return {
-        ...data,
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt : undefined,
-        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : undefined,
+      ...data,
+      createdAt:
+        data.createdAt instanceof Timestamp ? data.createdAt : undefined,
+      updatedAt:
+        data.updatedAt instanceof Timestamp ? data.updatedAt : undefined,
     } as UserProfile;
   } else {
     console.log(`No profile found for user ${uid}`);
     return null;
   }
 };
-
 
 /**
  * Checks if a user has associated company information by looking at currentCompanyId.

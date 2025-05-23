@@ -74,14 +74,17 @@ export const createCompany = async (
 
   try {
     await setDoc(newCompanyRef, newCompanyData);
-    console.log(`Company ${companyId} created successfully by user ${creatorId}.`);
+    console.log(
+      `Company ${companyId} created successfully by user ${creatorId}.`
+    );
     return companyId;
   } catch (error) {
     console.error('Company creation failed:', error);
-    throw new Error(`Failed to create company: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to create company: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 };
-
 
 /**
  * Handles the complete onboarding process for a new user and their company.
@@ -102,7 +105,10 @@ export const handleOnboarding = async (
   if (!data.fullName || !data.role) {
     throw new Error('Name and role are required.');
   }
-  if (!data.isFreelancer && (!data.companyName || !data.companySize || !data.companyField)) {
+  if (
+    !data.isFreelancer &&
+    (!data.companyName || !data.companySize || !data.companyField)
+  ) {
     throw new Error('Company details are required for non-freelancers.');
   }
 
@@ -115,9 +121,13 @@ export const handleOnboarding = async (
 
   const newCompanyData: Company = {
     companyId: companyId,
-    name: data.isFreelancer ? `Freelancer: ${data.fullName}` : data.companyName!,
+    name: data.isFreelancer
+      ? `Freelancer: ${data.fullName}`
+      : data.companyName!,
     size: data.isFreelancer ? '1 (Freelancer)' : data.companySize!,
-    field: data.isFreelancer ? data.freelancerIndustry || 'Freelance' : data.companyField!,
+    field: data.isFreelancer
+      ? data.freelancerIndustry || 'Freelance'
+      : data.companyField!,
     isFreelancer: data.isFreelancer,
     freelancerName: data.isFreelancer ? data.fullName : undefined,
     createdAt: now as Timestamp,
@@ -140,10 +150,14 @@ export const handleOnboarding = async (
 
   try {
     await batch.commit();
-    console.log(`Onboarding successful for user ${user.uid}, company ${companyId} created.`);
+    console.log(
+      `Onboarding successful for user ${user.uid}, company ${companyId} created.`
+    );
   } catch (error) {
     console.error('Onboarding process failed:', error);
-    throw new Error(`Failed during onboarding batch commit: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed during onboarding batch commit: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 };
 
@@ -187,9 +201,13 @@ export const addCompanyMember = async (
 
   try {
     await batch.commit();
-    console.log(`User ${user.uid} added successfully as member to company ${companyId}.`);
+    console.log(
+      `User ${user.uid} added successfully as member to company ${companyId}.`
+    );
   } catch (error) {
     console.error('Adding company member failed:', error);
-    throw new Error(`Failed to add company member: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to add company member: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 };

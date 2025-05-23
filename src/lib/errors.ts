@@ -3,7 +3,10 @@
  */
 
 export class AppError extends Error {
-  constructor(message: string, public readonly details?: unknown) {
+  constructor(
+    message: string,
+    public readonly details?: unknown
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     Error.captureStackTrace(this);
@@ -17,7 +20,7 @@ export function wrapError(error: unknown): AppError {
   if (error instanceof AppError) {
     return error;
   }
-  
+
   if (error instanceof Error) {
     return new AppError(error.message, { cause: error });
   }
@@ -43,7 +46,9 @@ export function catchError<T>(fn: () => T): T | AppError {
 /**
  * Async version of catchError
  */
-export async function catchAsyncError<T>(fn: () => Promise<T>): Promise<T | AppError> {
+export async function catchAsyncError<T>(
+  fn: () => Promise<T>
+): Promise<T | AppError> {
   try {
     return await fn();
   } catch (error) {

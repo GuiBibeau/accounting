@@ -4,36 +4,39 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 
 type SiteHeaderProps = {
   title: string;
-  actions?: React.ReactNode;
   lastSyncedAt?: string | null;
+  tabsContent?: React.ReactNode; // Added new prop for tabs
 };
 
 /**
- * @description Renders the site header with a dynamic title and optional action buttons.
+ * @description Renders the site header with a dynamic title.
  * Includes a trigger to toggle the sidebar visibility.
  * @param {SiteHeaderProps} props - Component props.
  * @param {string} props.title - The title to display in the header.
- * @param {React.ReactNode} [props.actions] - Optional React node(s) for action buttons/elements on the right side.
  */
-export function SiteHeader({ title, actions, lastSyncedAt }: SiteHeaderProps) {
+export function SiteHeader({
+  title,
+  lastSyncedAt,
+  tabsContent,
+}: SiteHeaderProps) {
   return (
-    <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b px-4 lg:px-6">
-      <SidebarTrigger className="-ml-1" />
-      <Separator
-        orientation="vertical"
-        className="mx-2 h-4" // Simplified class, assuming h-4 is sufficient
-      />
-      <div className="flex items-center gap-2">
-        <h1 className="text-base font-medium">{title}</h1>
-        {lastSyncedAt && (
-          <span className="text-xs text-muted-foreground">
-            (Synced: {lastSyncedAt})
-          </span>
-        )}
+    <header className="flex flex-col shrink-0 border-b px-4 lg:px-6 py-2">
+      {/* Top row for title, sync time, and actions */}
+      <div className="flex h-[calc(var(--header-height)_-_0.5rem)] w-full items-center gap-2">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mx-2 h-4" />
+        <div className="flex items-center gap-2">
+          <h1 className="text-base font-medium">{title}</h1>
+          {lastSyncedAt && (
+            <span className="text-xs text-muted-foreground">
+              (Synced: {lastSyncedAt})
+            </span>
+          )}
+        </div>
+        <div className="mt-2 w-full pl-[calc(4.25rem+1px)]">{tabsContent}</div>
       </div>
-      {actions && (
-        <div className="ml-auto flex items-center gap-2">{actions}</div>
-      )}
+
+      {/* Bottom row for tabs */}
     </header>
   );
 }

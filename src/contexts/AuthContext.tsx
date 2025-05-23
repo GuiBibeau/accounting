@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, {
   createContext,
@@ -7,19 +7,19 @@ import React, {
   useEffect,
   ReactNode,
   useCallback,
-} from "react";
+} from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { User, onAuthStateChanged, UserCredential } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { authService, AuthError } from "@/lib/auth.service";
-import { hasCompanyAssociation } from "@/lib/user";
-import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
+import { User, onAuthStateChanged, UserCredential } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { authService, AuthError } from '@/lib/auth.service';
+import { hasCompanyAssociation } from '@/lib/user';
+import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore';
 
 interface AuthContextProps {
   user: User | null;
   loading: boolean;
   needsOnboarding: boolean | null;
-  isYouTubeConnected: boolean; 
+  isYouTubeConnected: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   signupWithEmail: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
-  const [isYouTubeConnected, setIsYouTubeConnected] = useState(false); 
+  const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
   const [error, setError] = useState<AuthError | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -55,10 +55,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           onboardingStatus = !hasAssociation;
           setNeedsOnboarding(onboardingStatus);
         } catch (e) {
-          console.error("Failed to check company association:", e);
-          onboardingStatus = false; 
+          console.error('Failed to check company association:', e);
+          onboardingStatus = false;
           setNeedsOnboarding(onboardingStatus);
-          setError({ code: 'check-failed', message: 'Could not verify company status.' });
+          setError({
+            code: 'check-failed',
+            message: 'Could not verify company status.',
+          });
         }
       } else {
         onboardingStatus = null;
@@ -73,23 +76,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!authLoading) {
         if (!currentUser && !isAuthPage) {
-          console.log("AuthProvider: No user, redirecting to login.");
+          console.log('AuthProvider: No user, redirecting to login.');
           router.push('/login');
         } else if (currentUser) {
           if (onboardingStatus === true && !isOnboardingPage) {
-            console.log("AuthProvider: Needs onboarding, redirecting to /onboarding.");
+            console.log(
+              'AuthProvider: Needs onboarding, redirecting to /onboarding.'
+            );
             router.push('/onboarding');
           } else if (onboardingStatus === false && isOnboardingPage) {
-            console.log("AuthProvider: Onboarding complete/not needed, redirecting from onboarding to /chat.");
+            console.log(
+              'AuthProvider: Onboarding complete/not needed, redirecting from onboarding to /chat.'
+            );
             router.push('/chat');
           } else if (isAuthPage) {
-            const destination = onboardingStatus === true ? '/onboarding' : '/chat';
-            console.log(`AuthProvider: User logged in on auth page, redirecting to ${destination}.`);
+            const destination =
+              onboardingStatus === true ? '/onboarding' : '/chat';
+            console.log(
+              `AuthProvider: User logged in on auth page, redirecting to ${destination}.`
+            );
             router.push(destination);
           }
         }
       }
-
     });
     return () => unsubscribe();
   }, [pathname, router]);
@@ -99,12 +108,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     if (user) {
       const youtubeCredsRef = doc(db, `users/${user.uid}/integrations/youtube`);
-      unsubscribeYouTube = onSnapshot(youtubeCredsRef, (docSnap) => {
-        setIsYouTubeConnected(docSnap.exists() && !!docSnap.data()?.encryptedAccessToken);
-      }, (error) => {
-        console.error("Failed to subscribe to YouTube connection status:", error);
-        setIsYouTubeConnected(false);
-      });
+      unsubscribeYouTube = onSnapshot(
+        youtubeCredsRef,
+        (docSnap) => {
+          setIsYouTubeConnected(
+            docSnap.exists() && !!docSnap.data()?.encryptedAccessToken
+          );
+        },
+        (error) => {
+          console.error(
+            'Failed to subscribe to YouTube connection status:',
+            error
+          );
+          setIsYouTubeConnected(false);
+        }
+      );
     } else {
       setIsYouTubeConnected(false);
     }
@@ -114,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         unsubscribeYouTube();
       }
     };
-  }, [user]); 
+  }, [user]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -173,7 +191,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export const useAuth = (): AuthContextProps => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
@@ -185,12 +203,22 @@ export const useUser = () => {
 
 export const useLogin = () => {
   const { loginWithEmail, loginWithGoogle, error, clearError } = useAuth();
-  return { loginWithEmail, loginWithGoogle, loginError: error, clearLoginError: clearError };
+  return {
+    loginWithEmail,
+    loginWithGoogle,
+    loginError: error,
+    clearLoginError: clearError,
+  };
 };
 
 export const useSignup = () => {
-    const { signupWithEmail, loginWithGoogle, error, clearError } = useAuth();
-    return { signupWithEmail, signupWithGoogle: loginWithGoogle, signupError: error, clearSignupError: clearError };
+  const { signupWithEmail, loginWithGoogle, error, clearError } = useAuth();
+  return {
+    signupWithEmail,
+    signupWithGoogle: loginWithGoogle,
+    signupError: error,
+    clearSignupError: clearError,
+  };
 };
 
 export const useLogout = () => {

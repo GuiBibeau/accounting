@@ -101,7 +101,7 @@ export default function OnboardingClient() {
         onPointerDownOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Welcome! Let's get you set up.</DialogTitle>
+          <DialogTitle>Welcome! Let&apos;s get you set up.</DialogTitle>
         </DialogHeader>
 
         <div className="mt-4">

@@ -9,7 +9,9 @@ interface AssistantMessageProps {
   content: string;
 }
 
-export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content }) => {
+export const AssistantMessage: React.FC<AssistantMessageProps> = ({
+  content,
+}) => {
   const processedContent = content.replace(/\n(?!\n)/g, '\n\n');
 
   return (
@@ -18,10 +20,12 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content }) =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.3 }}
-     >
-       <div className="text-foreground w-full prose prose-sm dark:prose-invert max-w-none">
-         <ReactMarkdown remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
-       </div>
-     </motion.div>
+    >
+      <div className="text-foreground w-full prose prose-sm dark:prose-invert max-w-none">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {processedContent}
+        </ReactMarkdown>
+      </div>
+    </motion.div>
   );
 };

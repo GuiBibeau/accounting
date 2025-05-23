@@ -12,7 +12,10 @@ const scopes = [
 export async function GET(request: NextRequest) {
   const authorization = request.headers.get('Authorization');
   if (!authorization?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized: Missing Bearer token' }, { status: 401 });
+    return NextResponse.json(
+      { error: 'Unauthorized: Missing Bearer token' },
+      { status: 401 }
+    );
   }
   const idToken = authorization.split('Bearer ')[1];
 
@@ -23,14 +26,17 @@ export async function GET(request: NextRequest) {
     console.log(`Verified user ID: ${userId} for YouTube connect`);
   } catch (error) {
     console.error('Error verifying Firebase ID token:', error);
-    return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
+    return NextResponse.json(
+      { error: 'Unauthorized: Invalid token' },
+      { status: 401 }
+    );
   }
 
   if (!config.hasGoogleCredentials()) {
     console.error('Missing Google OAuth Client ID or Secret in config');
     return NextResponse.json(
       { error: 'Server configuration error: Missing Google OAuth credentials' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 

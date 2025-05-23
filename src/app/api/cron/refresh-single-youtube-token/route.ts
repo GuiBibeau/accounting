@@ -33,7 +33,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { userId, refreshToken } = await request.json();
 
     if (!userId || !refreshToken) {
-      return NextResponse.json({ success: false, error: 'Missing userId or refreshToken' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Missing userId or refreshToken' },
+        { status: 400 }
+      );
     }
 
     const oauth2Client = new google.auth.OAuth2(
@@ -45,29 +48,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let tokensSaved = false;
     oauth2Client.on('tokens', async (tokens) => {
       const updateData: Partial<YouTubeCredentials> = {
-          updatedAt: new Date(),
-          expiryDate: tokens.expiry_date ?? null,
-          scopes: tokens.scope,
+        updatedAt: new Date(),
+        expiryDate: tokens.expiry_date ?? null,
+        scopes: tokens.scope,
       };
 
       if (tokens.access_token) {
-          updateData.encryptedAccessToken = encrypt(tokens.access_token);
+        updateData.encryptedAccessToken = encrypt(tokens.access_token);
       }
 
       if (tokens.refresh_token) {
-        console.log(`Received NEW refresh token for user: ${userId}. Storing encrypted.`);
+        console.log(
+          `Received NEW refresh token for user: ${userId}. Storing encrypted.`
+        );
         updateData.encryptedRefreshToken = encrypt(tokens.refresh_token);
       }
 
       if (tokens.access_token || tokens.refresh_token) {
-          try {
-              await adminDb.doc(getCredentialsPath(userId)).set(updateData, { merge: true });
-              console.log(`Successfully updated YouTube tokens in Firestore for user ${userId}`);
-              tokensSaved = true;
-          } catch (error) {
-              console.error(`Failed to update YouTube tokens in Firestore for user ${userId}:`, error);
-              tokensSaved = false;
-          }
+        try {
+          await adminDb
+            .doc(getCredentialsPath(userId))
+            .set(updateData, { merge: true });
+          console.log(
+            `Successfully updated YouTube tokens in Firestore for user ${userId}`
+          );
+          tokensSaved = true;
+        } catch (error) {
+          console.error(
+            `Failed to update YouTube tokens in Firestore for user ${userId}:`,
+            error
+          );
+          tokensSaved = false;
+        }
       }
     });
 
@@ -80,20 +92,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const { token: newAccessToken } = await oauth2Client.getAccessToken();
 
       if (tokensSaved) {
-         console.log(`Token refresh successful and saved for user: ${userId}`);
-         return NextResponse.json({ success: true });
+        console.log(`Token refresh successful and saved for user: ${userId}`);
+        return NextResponse.json({ success: true });
       } else {
-         console.warn(`Token refresh process completed for user ${userId}, but listener did not confirm save. Access token present: ${!!newAccessToken}`);
-         return NextResponse.json({ success: true, message: 'Refresh process completed, check logs for save confirmation.' });
+        console.warn(
+          `Token refresh process completed for user ${userId}, but listener did not confirm save. Access token present: ${!!newAccessToken}`
+        );
+        return NextResponse.json({
+          success: true,
+          message:
+            'Refresh process completed, check logs for save confirmation.',
+        });
       }
-
     } catch (error: unknown) {
       let errorDetails: unknown = 'Unknown error';
       let isInvalidGrant = false;
 
       if (typeof error === 'object' && error !== null) {
-        const potentialGaxiosError = error as { response?: { data?: { error?: string; message?: string } }; message?: string };
-        errorDetails = potentialGaxiosError.response?.data || potentialGaxiosError.message || error;
+        const potentialGaxiosError = error as {
+          response?: { data?: { error?: string; message?: string } };
+          message?: string;
+        };
+        errorDetails =
+          potentialGaxiosError.response?.data ||
+          potentialGaxiosError.message ||
+          error;
         if (potentialGaxiosError.response?.data?.error === 'invalid_grant') {
           isInvalidGrant = true;
         }
@@ -104,26 +127,55 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       console.error(`Error refreshing token for user ${userId}:`, errorDetails);
 
       if (isInvalidGrant) {
-        console.warn(`Invalid grant (refresh token likely revoked or expired) for user ${userId}. Clearing token.`);
+        console.warn(
+          `Invalid grant (refresh token likely revoked or expired) for user ${userId}. Clearing token.`
+        );
         try {
           await adminDb.doc(getCredentialsPath(userId)).update({
             encryptedRefreshToken: null,
             encryptedAccessToken: null,
             expiryDate: null,
           });
-          return NextResponse.json({ success: false, error: 'invalid_grant', message: 'Refresh token is invalid and has been cleared.' }, { status: 400 });
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'invalid_grant',
+              message: 'Refresh token is invalid and has been cleared.',
+            },
+            { status: 400 }
+          );
         } catch (dbError) {
-          console.error(`Failed to clear invalid refresh token for user ${userId}:`, dbError);
-          return NextResponse.json({ success: false, error: 'invalid_grant', message: 'Refresh token is invalid, failed to clear from DB.' }, { status: 500 });
+          console.error(
+            `Failed to clear invalid refresh token for user ${userId}:`,
+            dbError
+          );
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'invalid_grant',
+              message: 'Refresh token is invalid, failed to clear from DB.',
+            },
+            { status: 500 }
+          );
         }
       }
 
-      return NextResponse.json({ success: false, error: 'Token refresh failed', details: errorDetails }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Token refresh failed',
+          details: errorDetails,
+        },
+        { status: 500 }
+      );
     }
-
   } catch (error: unknown) {
     console.error('Error in refresh-single-youtube-token handler:', error);
-    const message = error instanceof Error ? error.message : 'Unknown internal server error';
-    return NextResponse.json({ success: false, error: 'Internal Server Error', details: message }, { status: 500 });
+    const message =
+      error instanceof Error ? error.message : 'Unknown internal server error';
+    return NextResponse.json(
+      { success: false, error: 'Internal Server Error', details: message },
+      { status: 500 }
+    );
   }
 }

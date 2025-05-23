@@ -171,20 +171,25 @@ export const SideNav = () => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="space-y-2" 
+              className="space-y-2"
             >
-            
-              <Link href="/chat/history" className="block px-2 py-1.5 text-sm rounded-md hover:bg-accent">
+              <Link
+                href="/chat/history"
+                className="block px-2 py-1.5 text-sm rounded-md hover:bg-accent"
+              >
                 <div className="flex items-center">
                   <History className="w-4 h-4 mr-2" />
                   Recent Conversations
                 </div>
               </Link>
 
-              <div className="px-2 py-1"> 
+              <div className="px-2 py-1">
                 {isYouTubeConnected ? (
                   <div>
-                    <Link href="/youtube" className="block w-full py-1.5 text-sm rounded-md hover:bg-accent">
+                    <Link
+                      href="/youtube"
+                      className="block w-full py-1.5 text-sm rounded-md hover:bg-accent"
+                    >
                       <div className="flex items-center">
                         <YouTubeIcon className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
                         <span>YouTube</span>
@@ -195,7 +200,6 @@ export const SideNav = () => {
                   <ConnectYouTubeButton variant="full" />
                 )}
               </div>
-
             </motion.div>
           ) : (
             <motion.div
@@ -207,26 +211,26 @@ export const SideNav = () => {
               className="flex flex-col items-center pt-4 space-y-6"
             >
               <Link href="/chat" passHref>
-              <motion.button
-                className="p-2 rounded-md"
-                aria-label="Home"
-                whileHover={{
-                  scale: 1.1,
-                  backgroundColor: 'hsl(var(--accent))',
-                }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <HomeIcon className="w-5 h-5" />
-              </motion.button>
+                <motion.button
+                  className="p-2 rounded-md"
+                  aria-label="Home"
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'hsl(var(--accent))',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <HomeIcon className="w-5 h-5" />
+                </motion.button>
               </Link>
               <Link href="/chat/history" passHref>
                 <motion.button
                   className="p-2 rounded-md"
                   aria-label="View chat history"
-                whileHover={{
-                  scale: 1.1,
-                  backgroundColor: 'hsl(var(--accent))',
-                }}
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'hsl(var(--accent))',
+                  }}
                   whileTap={{ scale: 0.9 }}
                 >
                   <History className="w-5 h-5" />
@@ -239,10 +243,10 @@ export const SideNav = () => {
                     <motion.button
                       className="p-2 rounded-md"
                       aria-label="YouTube Options"
-                    whileHover={{
-                      scale: 1.1,
-                      backgroundColor: 'hsl(var(--accent))',
-                    }}
+                      whileHover={{
+                        scale: 1.1,
+                        backgroundColor: 'hsl(var(--accent))',
+                      }}
                       whileTap={{ scale: 0.9 }}
                     >
                       <YouTubeIcon className="w-5 h-5" />
@@ -252,7 +256,6 @@ export const SideNav = () => {
                   <ConnectYouTubeButton variant="icon" />
                 )}
               </div>
-
             </motion.div>
           )}
         </AnimatePresence>
@@ -291,7 +294,9 @@ export const SideNav = () => {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {user?.email && (
-                 <div className="text-sm text-muted-foreground">Logged in as: {user.email}</div>
+                <div className="text-sm text-muted-foreground">
+                  Logged in as: {user.email}
+                </div>
               )}
             </div>
             <Button variant="destructive" onClick={logout} className="w-full">

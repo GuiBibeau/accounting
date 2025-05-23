@@ -6,7 +6,7 @@ import { encrypt } from '@/lib/encryption';
 /**
  * Handles the Google OAuth callback for YouTube authentication.
  * Exchanges the authorization code for tokens, encrypts them, and stores in Firestore.
- * 
+ *
  * @param {NextRequest} request - The incoming request containing the authorization code and state
  * @returns {Promise<NextResponse>} Response indicating success or failure
  */
@@ -18,14 +18,14 @@ export async function GET(request: NextRequest) {
   if (!userId) {
     return NextResponse.json(
       { error: 'State parameter (User ID) missing.' },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   if (!code) {
     return NextResponse.json(
       { error: 'Authorization code missing.' },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -35,8 +35,10 @@ export async function GET(request: NextRequest) {
 
   if (!clientId || !clientSecret || !redirectUri) {
     return NextResponse.json(
-      { error: 'Server configuration error: Missing Google OAuth credentials.' },
-      { status: 500 },
+      {
+        error: 'Server configuration error: Missing Google OAuth credentials.',
+      },
+      { status: 500 }
     );
   }
 
@@ -51,9 +53,9 @@ export async function GET(request: NextRequest) {
       expiryDate: tokens.expiry_date ?? null,
       scopes: tokens.scope,
       updatedAt: new Date(),
-      ...(tokens.refresh_token && { 
-        encryptedRefreshToken: encrypt(tokens.refresh_token) 
-      })
+      ...(tokens.refresh_token && {
+        encryptedRefreshToken: encrypt(tokens.refresh_token),
+      }),
     };
 
     await adminDb
@@ -63,7 +65,8 @@ export async function GET(request: NextRequest) {
       .doc('youtube')
       .set(credentialsToStore, { merge: true });
 
-    return new NextResponse(`
+    return new NextResponse(
+      `
       <!DOCTYPE html>
       <html>
         <head>
@@ -81,17 +84,20 @@ export async function GET(request: NextRequest) {
           </script>
         </body>
       </html>
-    `, {
-      headers: {
-        'Content-Type': 'text/html',
-      },
-    });
-
+    `,
+      {
+        headers: {
+          'Content-Type': 'text/html',
+        },
+      }
+    );
   } catch (error) {
     return NextResponse.json(
-
-      { error: 'Failed to exchange authorization code for tokens.', details: error },
-      { status: 500 },
+      {
+        error: 'Failed to exchange authorization code for tokens.',
+        details: error,
+      },
+      { status: 500 }
     );
   }
 }

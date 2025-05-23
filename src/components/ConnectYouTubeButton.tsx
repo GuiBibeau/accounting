@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { getAuth } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react'; 
-import { YouTubeIcon } from '@/components/icons/YouTube'; 
+import { Loader2 } from 'lucide-react';
+import { YouTubeIcon } from '@/components/icons/YouTube';
 import { AppError, catchAsyncError } from '@/lib/errors';
 
 const auth = getAuth(app);
@@ -23,7 +23,9 @@ type ConnectYouTubeButtonProps = {
  * @param {'icon' | 'full'} [props.variant='full'] - Display variant ('icon' or 'full').
  * @returns {JSX.Element} Button with loading state and error handling.
  */
-export function ConnectYouTubeButton({ variant = 'full' }: ConnectYouTubeButtonProps) {
+export function ConnectYouTubeButton({
+  variant = 'full',
+}: ConnectYouTubeButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
 
@@ -40,7 +42,9 @@ export function ConnectYouTubeButton({ variant = 'full' }: ConnectYouTubeButtonP
     const user = auth.currentUser;
 
     if (!user) {
-      setError(new AppError('You must be logged in to connect your YouTube account.'));
+      setError(
+        new AppError('You must be logged in to connect your YouTube account.')
+      );
       setIsLoading(false);
       return;
     }
@@ -54,7 +58,9 @@ export function ConnectYouTubeButton({ variant = 'full' }: ConnectYouTubeButtonP
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`
+        );
       }
 
       const { authorizationUrl } = await response.json();
@@ -81,17 +87,23 @@ export function ConnectYouTubeButton({ variant = 'full' }: ConnectYouTubeButtonP
       >
         {isLoading ? (
           <>
-            <Loader2 className={`h-4 w-4 animate-spin ${variant === 'full' ? 'mr-2' : ''}`} />
+            <Loader2
+              className={`h-4 w-4 animate-spin ${variant === 'full' ? 'mr-2' : ''}`}
+            />
             {variant === 'full' && 'Connecting...'}
           </>
         ) : (
           <>
-            <YouTubeIcon className={`h-4 w-4 ${variant === 'full' ? 'mr-2' : ''}`} />
+            <YouTubeIcon
+              className={`h-4 w-4 ${variant === 'full' ? 'mr-2' : ''}`}
+            />
             {variant === 'full' && 'Connect YouTube'}
           </>
         )}
       </Button>
-      {error && <p className="mt-2 text-sm text-red-600 px-2">{error.message}</p>}
+      {error && (
+        <p className="mt-2 text-sm text-red-600 px-2">{error.message}</p>
+      )}
     </div>
   );
 }

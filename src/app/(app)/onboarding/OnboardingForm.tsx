@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import { OnboardingData, CompanyRole } from '@/lib/company';
 import { ArrowLeft } from 'lucide-react';
 
@@ -18,7 +18,12 @@ const companyRoles: CompanyRole[] = ['solo owner', 'accountant', 'president'];
 
 type FormDataSubset = Pick<
   OnboardingData,
-  'fullName' | 'role' | 'companySize' | 'companyName' | 'companyField' | 'isFreelancer'
+  | 'fullName'
+  | 'role'
+  | 'companySize'
+  | 'companyName'
+  | 'companyField'
+  | 'isFreelancer'
 >;
 
 interface OnboardingFormProps {
@@ -42,7 +47,6 @@ export default function OnboardingForm({
   handleSubmit,
   onBack,
 }: OnboardingFormProps) {
-
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   return (
@@ -59,7 +63,9 @@ export default function OnboardingForm({
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="scroll-m-20 text-3xl font-semibold tracking-tight">
-          {userType === 'freelancer' ? 'Freelancer Information' : 'Company Details'}
+          {userType === 'freelancer'
+            ? 'Freelancer Information'
+            : 'Company Details'}
         </h1>
       </div>
       <p className="text-muted-foreground mb-8">
@@ -111,9 +117,11 @@ export default function OnboardingForm({
             onChange={handleChange}
             required
             disabled={isLoading}
-            placeholder={formData.isFreelancer
-              ? 'e.g., Web Development, Design, Consulting'
-              : 'e.g., Technology, Retail, Consulting'}
+            placeholder={
+              formData.isFreelancer
+                ? 'e.g., Web Development, Design, Consulting'
+                : 'e.g., Technology, Retail, Consulting'
+            }
           />
         </div>
 
@@ -162,11 +170,7 @@ export default function OnboardingForm({
         )}
 
         <div className="pt-4">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? 'Saving...' : 'Complete Setup'}
           </Button>
         </div>

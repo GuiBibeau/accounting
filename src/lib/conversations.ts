@@ -27,10 +27,10 @@ export interface Conversation {
 
 /**
  * Creates a new conversation with a generated title based on the first message.
- * 
+ *
  * @param userId - The ID of the user creating the conversation.
  * @param message - The first message in the conversation.
- * 
+ *
  * @returns A promise that resolves to the ID of the created conversation.
  */
 export const createConversation = async ({
@@ -41,7 +41,7 @@ export const createConversation = async ({
   message: string;
 }) => {
   const conversationsCol = collection(db, 'conversations');
-  const conversationRef = doc(conversationsCol); 
+  const conversationRef = doc(conversationsCol);
 
   const batch = writeBatch(db);
 
@@ -56,7 +56,9 @@ export const createConversation = async ({
   if (!response.ok) {
     const errorData = await response.json();
     console.error('Error fetching summary:', errorData.error);
-    throw new Error(`Failed to generate conversation title: ${errorData.error || response.statusText}`);
+    throw new Error(
+      `Failed to generate conversation title: ${errorData.error || response.statusText}`
+    );
   }
 
   const { title } = await response.json();
@@ -66,7 +68,7 @@ export const createConversation = async ({
     title,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-  }
+  };
 
   batch.set(conversationRef, conversationData);
   const messagesColRef = collection(conversationRef, 'messages');
@@ -80,7 +82,7 @@ export const createConversation = async ({
 
   batch.set(firstMessageRef, messageData);
 
-  await batch.commit()
+  await batch.commit();
   return conversationRef.id; // Return the ID
 };
 

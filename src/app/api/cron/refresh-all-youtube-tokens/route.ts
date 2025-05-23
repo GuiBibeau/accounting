@@ -60,54 +60,82 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${process.env.CRON_SECRET}`,
+                  Authorization: `Bearer ${process.env.CRON_SECRET}`,
                 },
                 body: JSON.stringify({ userId, refreshToken }),
               })
-              .then(async (res) => {
+                .then(async (res) => {
                   if (!res.ok) {
-                      const errorBody = await res.text();
-                      console.error(`Failed to trigger refresh for user ${userId}: ${res.status} ${res.statusText}`, errorBody);
+                    const errorBody = await res.text();
+                    console.error(
+                      `Failed to trigger refresh for user ${userId}: ${res.status} ${res.statusText}`,
+                      errorBody
+                    );
                   } else {
-                      console.log(`Successfully triggered refresh job for user ${userId}`);
-                      triggeredJobs++;
+                    console.log(
+                      `Successfully triggered refresh job for user ${userId}`
+                    );
+                    triggeredJobs++;
                   }
-              })
-              .catch((error) => {
-                  console.error(`Error triggering refresh fetch for user ${userId}:`, error);
-              });
+                })
+                .catch((error) => {
+                  console.error(
+                    `Error triggering refresh fetch for user ${userId}:`,
+                    error
+                  );
+                });
 
-              const RequestContext = (globalThis as unknown as { [key: symbol]: { get(): { waitUntil?: (promise: Promise<unknown>) => void } | undefined } | undefined })[Symbol.for('@next/request-context')];
+              const RequestContext = (
+                globalThis as unknown as {
+                  [key: symbol]:
+                    | {
+                        get():
+                          | { waitUntil?: (promise: Promise<unknown>) => void }
+                          | undefined;
+                      }
+                    | undefined;
+                }
+              )[Symbol.for('@next/request-context')];
               const contextValue = RequestContext?.get();
               const waitUntil = contextValue?.waitUntil;
 
               if (waitUntil) {
-                  waitUntil(promise);
+                waitUntil(promise);
               } else {
-                  console.warn(`waitUntil not available for user ${userId}. Refresh trigger might delay response.`);
-                  refreshPromises.push(promise);
+                console.warn(
+                  `waitUntil not available for user ${userId}. Refresh trigger might delay response.`
+                );
+                refreshPromises.push(promise);
               }
             } else {
-              console.warn(`Decryption failed or refresh token empty for user ${userId}`);
+              console.warn(
+                `Decryption failed or refresh token empty for user ${userId}`
+              );
             }
           }
         }
       } catch (credError) {
-        console.error(`Error fetching/processing credentials for user ${userId}:`, credError);
+        console.error(
+          `Error fetching/processing credentials for user ${userId}:`,
+          credError
+        );
       }
     }
 
     if (refreshPromises.length > 0) {
-        await Promise.all(refreshPromises);
+      await Promise.all(refreshPromises);
     }
 
-    console.log(`Attempted to trigger refresh jobs for relevant users. Successfully triggered: ${triggeredJobs}.`);
+    console.log(
+      `Attempted to trigger refresh jobs for relevant users. Successfully triggered: ${triggeredJobs}.`
+    );
     return NextResponse.json({ success: true, triggeredJobs: triggeredJobs });
-
   } catch (error: unknown) {
     console.error('Error in refresh-all-youtube-tokens cron job:', error);
     if (error instanceof Error) {
-        return new NextResponse(`Internal Server Error: ${error.message}`, { status: 500 });
+      return new NextResponse(`Internal Server Error: ${error.message}`, {
+        status: 500,
+      });
     }
     return new NextResponse('Internal Server Error', { status: 500 });
   }

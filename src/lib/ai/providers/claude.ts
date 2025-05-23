@@ -1,61 +1,52 @@
 import { NextResponse } from 'next/server';
-import {
-  AiProvider,
-  AiProviderOptions,
-  AiProviderMessage,
-} from '../types';
-
+import { AiProvider, AiProviderOptions, AiProviderMessage } from '../types';
 
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
-
 
 function mapMessagesToClaudeFormat(messages: AiProviderMessage[]): {
   system?: string;
   messages: { role: 'user' | 'assistant'; content: string }[];
 } {
   let systemPrompt: string | undefined;
-  const formattedMessages: { role: 'user' | 'assistant'; content: string }[] = [];
+  const formattedMessages: { role: 'user' | 'assistant'; content: string }[] =
+    [];
 
   for (const msg of messages) {
     if (msg.role === 'system') {
-
       if (!systemPrompt) {
         systemPrompt = msg.content;
       } else {
-
-        console.warn('Multiple system prompts found; combining or ignoring subsequent ones.');
+        console.warn(
+          'Multiple system prompts found; combining or ignoring subsequent ones.'
+        );
 
         const lastMessage = formattedMessages[formattedMessages.length - 1];
         if (lastMessage?.role === 'user') {
-            lastMessage.content += `\n\n[System Note: ${msg.content}]`;
+          lastMessage.content += `\n\n[System Note: ${msg.content}]`;
         }
       }
     } else if (msg.role === 'user' || msg.role === 'assistant') {
-
-
       const lastRole = formattedMessages[formattedMessages.length - 1]?.role;
       if (lastRole === msg.role) {
-          console.warn(`Skipping message due to consecutive roles: ${msg.role}`);
-          continue;
+        console.warn(`Skipping message due to consecutive roles: ${msg.role}`);
+        continue;
       }
       formattedMessages.push({ role: msg.role, content: msg.content });
     }
   }
 
-
   if (systemPrompt && formattedMessages[0]?.role !== 'user') {
-      console.warn("Conversation doesn't start with a user message after system prompt.");
-
+    console.warn(
+      "Conversation doesn't start with a user message after system prompt."
+    );
   }
-
 
   return {
     ...(systemPrompt && { system: systemPrompt }),
     messages: formattedMessages,
   };
 }
-
 
 export class ClaudeProvider implements AiProvider {
   private apiKey: string;
@@ -84,16 +75,18 @@ export class ClaudeProvider implements AiProvider {
       );
     }
 
-    const { system, messages: claudeMessages } = mapMessagesToClaudeFormat(messages);
-
+    const { system, messages: claudeMessages } =
+      mapMessagesToClaudeFormat(messages);
 
     if (claudeMessages.length === 0 || claudeMessages[0].role !== 'user') {
-        return NextResponse.json(
-            { error: 'Invalid message sequence for Claude API. Must start with a user message.' },
-            { status: 400 }
-        );
+      return NextResponse.json(
+        {
+          error:
+            'Invalid message sequence for Claude API. Must start with a user message.',
+        },
+        { status: 400 }
+      );
     }
-
 
     try {
       const claudeResponse = await fetch(CLAUDE_API_URL, {
@@ -108,8 +101,6 @@ export class ClaudeProvider implements AiProvider {
           ...(system && { system }),
           messages: claudeMessages,
           stream: stream,
-
-
         }),
 
         // @ts-expect-error - duplex is not in standard fetch types yet
@@ -122,8 +113,8 @@ export class ClaudeProvider implements AiProvider {
 
         let details = errorText;
         try {
-            const errorJson = JSON.parse(errorText);
-            details = errorJson.error?.message || errorText;
+          const errorJson = JSON.parse(errorText);
+          details = errorJson.error?.message || errorText;
         } catch {}
         return NextResponse.json(
           {
@@ -140,14 +131,12 @@ export class ClaudeProvider implements AiProvider {
         return NextResponse.json(data);
       }
 
-
       if (!claudeResponse.body) {
         return NextResponse.json(
           { error: 'Claude API response body is null for stream' },
           { status: 500 }
         );
       }
-
 
       const responseStream = new ReadableStream({
         async start(controller) {
@@ -163,13 +152,11 @@ export class ClaudeProvider implements AiProvider {
               }
               buffer += decoder.decode(value, { stream: true });
 
-
               const lines = buffer.split('\n');
               buffer = lines.pop() || '';
 
               for (const line of lines) {
                 if (line.trim()) {
-
                   controller.enqueue(new TextEncoder().encode(line + '\n'));
                 }
               }
@@ -185,7 +172,6 @@ export class ClaudeProvider implements AiProvider {
           console.log('Claude Stream cancelled:', reason);
         },
       });
-
 
       return new NextResponse(responseStream, {
         headers: {

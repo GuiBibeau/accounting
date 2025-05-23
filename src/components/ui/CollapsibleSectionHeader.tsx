@@ -9,17 +9,16 @@ type CollapsibleSectionHeaderProps = {
   isExpanded: boolean;
   onToggle: (event: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
-}
+};
 
-export const CollapsibleSectionHeader: React.FC<CollapsibleSectionHeaderProps> = ({
-  title,
-  isExpanded,
-  onToggle,
-  className = '',
-}) => {
+export const CollapsibleSectionHeader: React.FC<
+  CollapsibleSectionHeaderProps
+> = ({ title, isExpanded, onToggle, className = '' }) => {
   return (
     <div className={`flex items-center justify-between ${className}`}>
-      <div className="font-medium text-sm text-muted-foreground flex-grow">{title}</div>
+      <div className="font-medium text-sm text-muted-foreground flex-grow">
+        {title}
+      </div>
       <motion.button
         onClick={(e) => {
           e.stopPropagation();

@@ -2,7 +2,7 @@ import { useState, useCallback, FormEvent } from 'react';
 
 export interface Message {
   id: string;
-  role: 'system' | 'user' | 'assistant' | 'data'; 
+  role: 'system' | 'user' | 'assistant' | 'data';
   content: string;
   createdAt?: Date;
 }
@@ -24,7 +24,9 @@ interface UseChatHelpers {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
   ) => void;
   handleSubmit: (
     e: FormEvent<HTMLFormElement>,
@@ -34,9 +36,9 @@ interface UseChatHelpers {
     message: Message | Omit<Message, 'id'>,
     chatRequestOptions?: { body?: Record<string, unknown> }
   ) => Promise<string | null | undefined>;
-  reload: (
-    chatRequestOptions?: { body?: Record<string, unknown> }
-  ) => Promise<string | null | undefined>;
+  reload: (chatRequestOptions?: {
+    body?: Record<string, unknown>;
+  }) => Promise<string | null | undefined>;
   stop: () => void;
   isLoading: boolean;
   error: Error | undefined;
@@ -60,7 +62,11 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
+    (
+      e:
+        | React.ChangeEvent<HTMLInputElement>
+        | React.ChangeEvent<HTMLTextAreaElement>
+    ) => {
       setInput(e.target.value);
     },
     []
@@ -85,11 +91,16 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
 
       const currentMessages = [...messages, newMessage];
       // Prepare messages for API, potentially prepending system prompt
-      let apiMessages = currentMessages.map(({ role, content }) => ({ role, content }));
+      let apiMessages = currentMessages.map(({ role, content }) => ({
+        role,
+        content,
+      }));
       if (options.systemPrompt) {
-        apiMessages = [{ role: 'system', content: options.systemPrompt }, ...apiMessages];
+        apiMessages = [
+          { role: 'system', content: options.systemPrompt },
+          ...apiMessages,
+        ];
       }
-
 
       try {
         const response = await fetch(api, {
@@ -116,7 +127,12 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
         const assistantMessageId = generateId();
         setMessages((prevMessages) => [
           ...prevMessages,
-          { id: assistantMessageId, role: 'assistant', content: '', createdAt: new Date() },
+          {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: '',
+            createdAt: new Date(),
+          },
         ]);
 
         const reader = response.body.getReader();
@@ -129,7 +145,7 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
           done = streamDone;
           const chunk = decoder.decode(value, { stream: true });
 
-          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          const lines = chunk.split('\n').filter((line) => line.trim() !== '');
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const dataContent = line.substring(6).trim();
@@ -150,17 +166,22 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
                   );
                 }
               } catch (e) {
-                console.error('Failed to parse stream data chunk:', dataContent, e);
+                console.error(
+                  'Failed to parse stream data chunk:',
+                  dataContent,
+                  e
+                );
               }
             }
           }
         }
 
-        const finalAssistantMessage = messages.find(msg => msg.id === assistantMessageId);
+        const finalAssistantMessage = messages.find(
+          (msg) => msg.id === assistantMessageId
+        );
         if (finalAssistantMessage) {
           onFinish?.(finalAssistantMessage);
         }
-
       } catch (err) {
         console.error('useChat Error:', err);
         const fetchError = err instanceof Error ? err : new Error(String(err));
@@ -172,9 +193,17 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
       }
       return undefined;
     },
-    [api, messages, isLoading, initialBody, onResponse, onFinish, onError, options.systemPrompt]
+    [
+      api,
+      messages,
+      isLoading,
+      initialBody,
+      onResponse,
+      onFinish,
+      onError,
+      options.systemPrompt,
+    ]
   );
-
 
   const handleSubmit = useCallback(
     (
@@ -190,31 +219,40 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
     [input, append]
   );
 
-  const reload = useCallback(async (
-    chatRequestOptions?: { body?: Record<string, unknown> }
-  ): Promise<string | null | undefined> => {
-    if (isLoading || messages.length === 0) return;
+  const reload = useCallback(
+    async (chatRequestOptions?: {
+      body?: Record<string, unknown>;
+    }): Promise<string | null | undefined> => {
+      if (isLoading || messages.length === 0) return;
 
-    setIsLoading(true);
-    setError(undefined);
-    const lastMessage = messages[messages.length - 1];
+      setIsLoading(true);
+      setError(undefined);
+      const lastMessage = messages[messages.length - 1];
 
-    const messagesToResend = messages.slice(0, -1);
-    if (messagesToResend.length === 0 || lastMessage.role !== 'assistant') {
+      const messagesToResend = messages.slice(0, -1);
+      if (messagesToResend.length === 0 || lastMessage.role !== 'assistant') {
         setIsLoading(false);
-        console.warn("Reload cannot proceed: No previous assistant message to regenerate.");
+        console.warn(
+          'Reload cannot proceed: No previous assistant message to regenerate.'
+        );
         return;
-    }
-
-    setMessages(messagesToResend);
-
-    // Prepare messages for API, potentially prepending system prompt
-    let apiMessages = messagesToResend.map(({ role, content }) => ({ role, content }));
-     if (options.systemPrompt) {
-        apiMessages = [{ role: 'system', content: options.systemPrompt }, ...apiMessages];
       }
 
-    try {
+      setMessages(messagesToResend);
+
+      // Prepare messages for API, potentially prepending system prompt
+      let apiMessages = messagesToResend.map(({ role, content }) => ({
+        role,
+        content,
+      }));
+      if (options.systemPrompt) {
+        apiMessages = [
+          { role: 'system', content: options.systemPrompt },
+          ...apiMessages,
+        ];
+      }
+
+      try {
         const response = await fetch(api, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -236,7 +274,12 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
         const assistantMessageId = generateId();
         setMessages((prevMessages) => [
           ...prevMessages,
-          { id: assistantMessageId, role: 'assistant', content: '', createdAt: new Date() },
+          {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: '',
+            createdAt: new Date(),
+          },
         ]);
 
         const reader = response.body.getReader();
@@ -248,7 +291,7 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
           const { value, done: streamDone } = await reader.read();
           done = streamDone;
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          const lines = chunk.split('\n').filter((line) => line.trim() !== '');
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const dataContent = line.substring(6).trim();
@@ -266,24 +309,42 @@ export function useChat(options: UseChatOptions = {}): UseChatHelpers {
                     )
                   );
                 }
-              } catch (e) { console.error('Failed to parse stream data chunk:', dataContent, e); }
+              } catch (e) {
+                console.error(
+                  'Failed to parse stream data chunk:',
+                  dataContent,
+                  e
+                );
+              }
             }
           }
         }
 
-        const finalAssistantMessage = messages.find(msg => msg.id === assistantMessageId);
+        const finalAssistantMessage = messages.find(
+          (msg) => msg.id === assistantMessageId
+        );
         if (finalAssistantMessage) onFinish?.(finalAssistantMessage);
-
-    } catch (err) {
+      } catch (err) {
         console.error('useChat Reload Error:', err);
         const fetchError = err instanceof Error ? err : new Error(String(err));
         setError(fetchError);
         onError?.(fetchError);
-    } finally {
+      } finally {
         setIsLoading(false);
-    }
-    return undefined;
-  }, [api, messages, isLoading, initialBody, onResponse, onFinish, onError, options.systemPrompt]);
+      }
+      return undefined;
+    },
+    [
+      api,
+      messages,
+      isLoading,
+      initialBody,
+      onResponse,
+      onFinish,
+      onError,
+      options.systemPrompt,
+    ]
+  );
 
   const stop = useCallback(() => {
     console.warn('stop() is not fully implemented yet.');

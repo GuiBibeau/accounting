@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { SiteHeader } from '@/components/site-header'; 
+import { SiteHeader } from '@/components/site-header';
 import {
   getAllUserConversations,
   type Conversation,
@@ -16,7 +16,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'; 
+} from '@/components/ui/table';
 
 export default function ConversationHistoryPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -45,40 +45,39 @@ export default function ConversationHistoryPage() {
   }, [user]);
 
   return (
-    <> 
-      <SiteHeader title="Conversation History" /> 
-      <div className="flex flex-col flex-1 overflow-y-auto p-4 lg:p-6"> 
-
+    <>
+      <SiteHeader title="Conversation History" />
+      <div className="flex flex-col flex-1 overflow-y-auto p-4 lg:p-6">
         {loading && <p>Loading history...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
-      {!loading && !error && conversations.length === 0 && (
-        <p>No conversations found.</p>
-      )}
+        {!loading && !error && conversations.length === 0 && (
+          <p>No conversations found.</p>
+        )}
 
-      {!loading && !error && conversations.length > 0 && (
-        <Table>
-          <TableCaption>A list of your recent conversations.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead className="text-right">Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {conversations.map((conv: Conversation) => ( 
-              <TableRow key={conv.id}>
-                <TableCell className="font-medium">
-                  <Link href={`/chat/${conv.id}`} className="hover:underline">
-                    {conv.title}
-                  </Link>
-                </TableCell>
-                <TableCell className="text-right">{conv.date}</TableCell>
+        {!loading && !error && conversations.length > 0 && (
+          <Table>
+            <TableCaption>A list of your recent conversations.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead className="text-right">Date</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+            </TableHeader>
+            <TableBody>
+              {conversations.map((conv: Conversation) => (
+                <TableRow key={conv.id}>
+                  <TableCell className="font-medium">
+                    <Link href={`/chat/${conv.id}`} className="hover:underline">
+                      {conv.title}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-right">{conv.date}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     </>
   );

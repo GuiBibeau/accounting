@@ -8,10 +8,10 @@ import {
   addDoc,
   serverTimestamp,
   Timestamp, // Import Timestamp
-  query,     // Added
-  where,     // Added
-  orderBy,   // Added
-  getDocs,   // Added
+  query, // Added
+  where, // Added
+  orderBy, // Added
+  getDocs, // Added
 } from 'firebase/firestore';
 // No need for external uuid package, use built-in crypto
 import { storage, db } from './firebase'; // Import initialized instances
@@ -53,7 +53,7 @@ export type VideoMetadata = {
 export async function uploadVideoToStorage(
   file: File,
   userId: string,
-  progressCallback?: (progress: number) => void,
+  progressCallback?: (progress: number) => void
 ): Promise<{ storagePath: string; fileName: string; contentType: string }> {
   if (!userId) {
     throw new Error('User ID is required for uploading video.');
@@ -93,7 +93,7 @@ export async function uploadVideoToStorage(
         switch (error.code) {
           case 'storage/unauthorized':
             reject(
-              new Error("User doesn't have permission to access the object"),
+              new Error("User doesn't have permission to access the object")
             );
             break;
           case 'storage/canceled':
@@ -101,7 +101,7 @@ export async function uploadVideoToStorage(
             break;
           case 'storage/unknown':
             reject(
-              new Error('Unknown error occurred, inspect error.serverResponse'),
+              new Error('Unknown error occurred, inspect error.serverResponse')
             );
             break;
           default:
@@ -120,7 +120,7 @@ export async function uploadVideoToStorage(
           fileName: file.name,
           contentType: file.type,
         });
-      },
+      }
     );
   });
 }
@@ -133,7 +133,7 @@ export async function uploadVideoToStorage(
  * @throws Throws an error if the Firestore operation fails.
  */
 export async function createVideoRecord(
-  metadata: Omit<VideoMetadata, 'id' | 'createdAt'>,
+  metadata: Omit<VideoMetadata, 'id' | 'createdAt'>
 ): Promise<string> {
   try {
     const videoCollectionRef = collection(db, 'videos');
@@ -163,7 +163,11 @@ export async function getUserVideos(userId: string): Promise<VideoMetadata[]> {
 
   try {
     const videoCollectionRef = collection(db, 'videos');
-    const q = query(videoCollectionRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const q = query(
+      videoCollectionRef,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
     const querySnapshot = await getDocs(q);
 
     const videos: VideoMetadata[] = [];

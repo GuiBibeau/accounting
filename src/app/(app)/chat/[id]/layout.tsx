@@ -16,7 +16,7 @@ export default function ChatLayout({
 
   useEffect(() => {
     if (!id) return;
-    
+
     const fetchTitle = async () => {
       const conversation = await getConversation(id as string);
       setTitle(conversation?.title || 'Untitled Conversation');
@@ -25,7 +25,8 @@ export default function ChatLayout({
     fetchTitle();
   }, [id]);
 
-  const titleBarAnimation = { // Corrected typo: consst -> const
+  const titleBarAnimation = {
+    // Corrected typo: consst -> const
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.5 } }, // Increased duration
   };

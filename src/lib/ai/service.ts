@@ -3,9 +3,7 @@ import { GroqProvider } from './providers/groq';
 import { GeminiProvider } from './providers/gemini';
 import { ClaudeProvider } from './providers/claude';
 
-
 const providerInstances: Partial<Record<AiProviderId, AiProvider>> = {};
-
 
 export function getAiProvider(providerId: AiProviderId): AiProvider {
   if (providerInstances[providerId]) {
@@ -25,8 +23,6 @@ export function getAiProvider(providerId: AiProviderId): AiProvider {
       provider = new ClaudeProvider();
       break;
     default:
-
-
       throw new Error(`Unsupported AI provider: ${providerId}`);
   }
 
@@ -34,10 +30,12 @@ export function getAiProvider(providerId: AiProviderId): AiProvider {
   return provider;
 }
 
-
 export function determineProviderFromModel(model: string): AiProviderId {
-  if (model.startsWith('llama') || model.startsWith('mixtral') || model.startsWith('gemma')) {
-
+  if (
+    model.startsWith('llama') ||
+    model.startsWith('mixtral') ||
+    model.startsWith('gemma')
+  ) {
     return 'groq';
   }
   if (model.startsWith('gemini')) {
@@ -46,7 +44,6 @@ export function determineProviderFromModel(model: string): AiProviderId {
   if (model.startsWith('claude')) {
     return 'claude';
   }
-
 
   throw new Error(`Could not determine AI provider for model: ${model}`);
 }

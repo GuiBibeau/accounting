@@ -3,11 +3,19 @@ import { PaperclipIcon, SendHorizontal } from 'lucide-react';
 
 type Props = {
   handleSubmitMessage: (e: React.FormEvent<HTMLFormElement>) => void;
-   handleInputChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void
+  handleInputChange: (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
+  ) => void;
   input: string;
 };
 
-export const ChatInput: React.FC<Props> = ({ handleSubmitMessage, input, handleInputChange }) => {
+export const ChatInput: React.FC<Props> = ({
+  handleSubmitMessage,
+  input,
+  handleInputChange,
+}) => {
   return (
     <div className="p-4 w-full mb-8">
       <div className="relative mx-auto max-w-[90%] md:max-w-[80%] lg:max-w-[70%]">

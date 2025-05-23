@@ -7,7 +7,7 @@ import { getMessages, saveMessage } from '@/lib/messages';
 import { useChat, type Message } from '@/hooks/useChat';
 import { useUser } from '@/contexts/AuthContext';
 import { systemPrompt } from '@/lib/system-prompt';
-import { SiteHeader } from '@/components/site-header'; 
+import { SiteHeader } from '@/components/site-header';
 import { ChatInput } from './ChatInput';
 import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
@@ -42,7 +42,6 @@ export default function ChatPage() {
   } = useChat({
     onFinish,
     systemPrompt,
-
   });
 
   useEffect(() => {
@@ -68,7 +67,7 @@ export default function ChatPage() {
       }
     );
     return () => unsubscribe();
-  }, [conversationId, append, isLoading, messages.length, setMessages]); 
+  }, [conversationId, append, isLoading, messages.length, setMessages]);
 
   const handleSubmitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,7 +80,7 @@ export default function ChatPage() {
 
   return (
     <>
-      <SiteHeader title="Chat" /> 
+      <SiteHeader title="Chat" />
       <div className="flex-1 overflow-y-auto p-4 relative">
         <div className="max-w-4xl mx-auto">
           {messages.map((message, index) => (
@@ -93,7 +92,10 @@ export default function ChatPage() {
               className="mb-6 flex justify-center"
             >
               {message.role === 'user' ? (
-                <UserMessage content={message.content} userEmail={user?.email} /> // Use the UserMessage component
+                <UserMessage
+                  content={message.content}
+                  userEmail={user?.email}
+                /> // Use the UserMessage component
               ) : (
                 <AssistantMessage content={message.content} /> // Use the AssistantMessage component
               )}

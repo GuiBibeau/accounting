@@ -21,7 +21,9 @@ const getCredentialsPath = (userId: string): string =>
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    console.warn('Unauthorized attempt to access sync-single-user-youtube-data');
+    console.warn(
+      'Unauthorized attempt to access sync-single-user-youtube-data'
+    );
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
@@ -33,33 +35,53 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!userId || typeof userId !== 'string') {
       console.error('Missing or invalid userId in request body');
-      return NextResponse.json({ success: false, error: 'Missing or invalid userId' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Missing or invalid userId' },
+        { status: 400 }
+      );
     }
 
     console.log(`Received request to sync YouTube data for user: ${userId}`);
 
     const userDoc = await adminDb.doc(`users/${userId}`).get();
     if (!userDoc.exists) {
-        console.error(`User ${userId} not found in Firestore.`);
-        return NextResponse.json({ success: false, error: `User ${userId} not found` }, { status: 404 });
+      console.error(`User ${userId} not found in Firestore.`);
+      return NextResponse.json(
+        { success: false, error: `User ${userId} not found` },
+        { status: 404 }
+      );
     }
 
     const credsPath = getCredentialsPath(userId);
     const credsDocSnapshot = await adminDb.doc(credsPath).get();
 
     if (!credsDocSnapshot.exists) {
-      console.log(`No YouTube integration found for user ${userId}. Skipping sync.`);
-      return NextResponse.json({ success: true, message: `No YouTube integration found for user ${userId}. Sync skipped.` });
+      console.log(
+        `No YouTube integration found for user ${userId}. Skipping sync.`
+      );
+      return NextResponse.json({
+        success: true,
+        message: `No YouTube integration found for user ${userId}. Sync skipped.`,
+      });
     }
 
     await syncYoutubeData(userId);
 
     console.log(`Successfully completed YouTube data sync for user: ${userId}`);
-    return NextResponse.json({ success: true, message: `Sync completed for user ${userId}` });
-
+    return NextResponse.json({
+      success: true,
+      message: `Sync completed for user ${userId}`,
+    });
   } catch (error: unknown) {
     console.error(`Error syncing YouTube data for user ${userId}:`, error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json({ success: false, error: `Sync failed for user ${userId}: ${errorMessage}` }, { status: 500 });
+    const errorMessage =
+      error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json(
+      {
+        success: false,
+        error: `Sync failed for user ${userId}: ${errorMessage}`,
+      },
+      { status: 500 }
+    );
   }
 }

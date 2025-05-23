@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { YouTubeVideoCard, type YouTubeVideoDetails } from './YouTubeVideoCard';
+import { PublishedVideosGridSkeleton } from './PublishedVideosGridSkeleton';
 
 type PublishedVideosGridProps = {
   videos: YouTubeVideoDetails[];
@@ -15,7 +16,7 @@ export function PublishedVideosGrid({
   error,
 }: PublishedVideosGridProps) {
   if (isLoading) {
-    return <div className="text-center p-4">Loading published videos...</div>;
+    return <PublishedVideosGridSkeleton />;
   }
 
   if (error) {

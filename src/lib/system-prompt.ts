@@ -1,10 +1,7 @@
-export const systemPrompt = "You";
+export const systemPrompt = 'You';
 
-
-export const SYSTEM_PROMPT = async (
-
-) => {
-	return `
+export const SYSTEM_PROMPT = async () => {
+  return `
 	You are Relate, a highly skilled developer relations engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices
 	
     ====
@@ -34,4 +31,4 @@ export const SYSTEM_PROMPT = async (
 
 	
 	`;
-}
+};

@@ -14,7 +14,9 @@ export function ChatInterface() {
     <Card className="flex flex-col h-[500px]">
       {/* Chat History Area */}
       <CardContent className="flex-1 p-4 overflow-y-auto bg-muted/50">
-        <p className="text-sm text-muted-foreground">Chat messages will appear here.</p>
+        <p className="text-sm text-muted-foreground">
+          Chat messages will appear here.
+        </p>
       </CardContent>
 
       {/* Input Area */}
@@ -25,7 +27,7 @@ export function ChatInterface() {
             className="flex-1 resize-none min-h-[40px]"
             rows={1}
           />
-          
+
           <input
             type="file"
             ref={fileInputRef}

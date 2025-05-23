@@ -27,30 +27,38 @@ interface FirestoreMessage {
 /**
  * Firestore data converter that translates between Vercel AI SDK Message format
  * and our Firestore message structure.
- * 
+ *
  * This converter handles:
  * - Converting Vercel Message objects to Firestore documents when saving
  * - Converting Firestore documents to Vercel Message objects when reading
  * - Type safety between the two formats
  * - Automatic timestamp handling
- * 
+ *
  * @type {FirestoreDataConverter<VercelMessage, FirestoreMessage>}
  */
-const messageConverter: FirestoreDataConverter<VercelMessage, FirestoreMessage> = {
+const messageConverter: FirestoreDataConverter<
+  VercelMessage,
+  FirestoreMessage
+> = {
   /**
    * Converts a Vercel AI SDK Message to a Firestore document.
    * @param {VercelMessage} message - The Vercel message to convert
    * @returns {FirestoreMessage} The Firestore document data
-   * 
+   *
    * Note: Only 'user' and 'assistant' roles are supported for storage.
    * Other roles will be converted to 'assistant' with a warning.
    * The createdAt timestamp is handled automatically by Firestore.
    */
   toFirestore(message: VercelMessage): FirestoreMessage {
     if (message.role !== 'user' && message.role !== 'assistant') {
-      console.warn(`Attempted to save message with unsupported role: ${message.role}. Storing as 'assistant'.`);
+      console.warn(
+        `Attempted to save message with unsupported role: ${message.role}. Storing as 'assistant'.`
+      );
     }
-    const roleToSave = (message.role === 'user' || message.role === 'assistant') ? message.role : 'assistant';
+    const roleToSave =
+      message.role === 'user' || message.role === 'assistant'
+        ? message.role
+        : 'assistant';
 
     return {
       role: roleToSave,
@@ -62,7 +70,7 @@ const messageConverter: FirestoreDataConverter<VercelMessage, FirestoreMessage> 
    * @param {QueryDocumentSnapshot<FirestoreMessage>} snapshot - The Firestore document snapshot
    * @param {SnapshotOptions} [options] - Optional snapshot options
    * @returns {VercelMessage} The converted Vercel message
-   * 
+   *
    * Handles:
    * - Converting Firestore Timestamp to JavaScript Date
    * - Adding the document ID as message ID
@@ -73,7 +81,10 @@ const messageConverter: FirestoreDataConverter<VercelMessage, FirestoreMessage> 
     options?: SnapshotOptions
   ): VercelMessage {
     const data = snapshot.data(options);
-    const role = (data.role === 'user' || data.role === 'assistant') ? data.role : 'assistant';
+    const role =
+      data.role === 'user' || data.role === 'assistant'
+        ? data.role
+        : 'assistant';
 
     return {
       id: snapshot.id,
@@ -98,8 +109,10 @@ export const saveMessage = async (
     throw new Error('saveMessage: conversationId is required');
   }
   if (message.role !== 'user' && message.role !== 'assistant') {
-     console.warn(`saveMessage: Attempting to save message with unsupported role '${message.role}'. Skipping save.`);
-     return;
+    console.warn(
+      `saveMessage: Attempting to save message with unsupported role '${message.role}'. Skipping save.`
+    );
+    return;
   }
 
   const messagesCol = collection(
@@ -107,14 +120,13 @@ export const saveMessage = async (
     'conversations',
     conversationId,
     'messages'
-  )
+  );
 
   const messageData = {
     role: message.role,
     content: message.content,
     createdAt: serverTimestamp(),
-  }
-  
+  };
 
   await addDoc(messagesCol, messageData);
 };

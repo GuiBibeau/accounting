@@ -13,7 +13,7 @@ const SCOPES = [
 /**
  * Generates a Google OAuth URL for YouTube authentication.
  * Verifies the Firebase ID token and returns an authorization URL.
- * 
+ *
  * @param {NextRequest} request - The incoming request containing the Firebase ID token
  * @returns {Promise<NextResponse>} Response containing the authorization URL or error
  */
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   const authorization = request.headers.get('Authorization');
   if (!authorization?.startsWith('Bearer ')) {
     return NextResponse.json(
-      { error: 'Unauthorized: Missing Bearer token' }, 
+      { error: 'Unauthorized: Missing Bearer token' },
       { status: 401 }
     );
   }
@@ -32,10 +32,10 @@ export async function GET(request: NextRequest) {
   try {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     userId = decodedToken.uid;
-  } catch (error: unknown ) {
+  } catch (error: unknown) {
     console.error('Error verifying ID token:', error);
     return NextResponse.json(
-      { error: 'Unauthorized: Invalid token' }, 
+      { error: 'Unauthorized: Invalid token' },
       { status: 401 }
     );
   }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     console.error('Missing Google OAuth Client ID or Secret in config');
     return NextResponse.json(
       { error: 'Server configuration error: Missing Google OAuth credentials' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 

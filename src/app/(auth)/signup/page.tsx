@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useSignup, useUser } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { AuthLayout } from "@/components/auth-layout";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useSignup, useUser } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { AuthLayout } from '@/components/auth-layout';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -16,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -24,26 +24,29 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { FcGoogle } from 'react-icons/fc';
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  email: z.string().email({ message: 'Invalid email address.' }),
+  password: z
+    .string()
+    .min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
 export default function SignupPage() {
-  const { signupWithEmail, signupWithGoogle, signupError, clearSignupError } = useSignup();
+  const { signupWithEmail, signupWithGoogle, signupError, clearSignupError } =
+    useSignup();
   const { user, loading } = useUser();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
@@ -51,9 +54,9 @@ export default function SignupPage() {
     clearSignupError();
     await signupWithEmail(values.email, values.password);
     if (!signupError) {
-      router.push("/chat");
+      router.push('/chat');
     } else {
-      form.setError("root", { type: "manual", message: signupError.message });
+      form.setError('root', { type: 'manual', message: signupError.message });
     }
   };
 
@@ -61,20 +64,27 @@ export default function SignupPage() {
     clearSignupError();
     await signupWithGoogle();
     if (!signupError) {
-      router.push("/chat");
+      router.push('/chat');
     } else {
-      form.setError("root", { type: "manual", message: `Google signup failed: ${signupError.message}` });
+      form.setError('root', {
+        type: 'manual',
+        message: `Google signup failed: ${signupError.message}`,
+      });
     }
   };
 
   React.useEffect(() => {
     if (!loading && user) {
-      router.push("/chat");
+      router.push('/chat');
     }
   }, [user, loading, router]);
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
   if (user) return null;
@@ -90,7 +100,10 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleEmailSignup)} className="grid gap-4">
+            <form
+              onSubmit={form.handleSubmit(handleEmailSignup)}
+              className="grid gap-4"
+            >
               <FormField
                 control={form.control}
                 name="email"
@@ -133,13 +146,24 @@ export default function SignupPage() {
                   {form.formState.errors.root.message}
                 </p>
               )}
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Signing Up..." : "Sign Up with Email"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting
+                  ? 'Signing Up...'
+                  : 'Sign Up with Email'}
               </Button>
             </form>
           </Form>
           <Separator className="my-4" />
-          <Button variant="outline" onClick={handleGoogleSignup} className="w-full flex items-center justify-center gap-2" disabled={form.formState.isSubmitting}>
+          <Button
+            variant="outline"
+            onClick={handleGoogleSignup}
+            className="w-full flex items-center justify-center gap-2"
+            disabled={form.formState.isSubmitting}
+          >
             <FcGoogle className="h-5 w-5" />
             Sign Up with Google
           </Button>

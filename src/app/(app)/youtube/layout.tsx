@@ -100,18 +100,21 @@ const YouTubeLayout = ({ children }: YouTubeLayoutProps) => {
 
   return (
     <>
-      <SiteHeader title="YouTube Management" lastSyncedAt={lastSyncedAt} />
-      <div className="px-4 lg:px-6 pt-2 pb-4 border-b">
-        <Tabs value={activeTabValue} className="w-full">
-          <TabsList>
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.href} value={tab.href} asChild>
-                <Link href={tab.href}>{tab.name}</Link>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </div>
+      <SiteHeader
+        title="YouTube Management"
+        lastSyncedAt={lastSyncedAt}
+        tabsContent={
+          <Tabs value={activeTabValue} className="w-full">
+            <TabsList>
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.href} value={tab.href} asChild>
+                  <Link href={tab.href}>{tab.name}</Link>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        }
+      />
       <div className="flex flex-col flex-1 overflow-y-auto">{children}</div>
     </>
   );

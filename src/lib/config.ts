@@ -15,11 +15,13 @@ export const config = {
    */
   get googleRedirectUri(): string {
     if (!this.appUrl) {
-        console.error("Configuration Error: NEXT_PUBLIC_APP_URL is not set.");
-         throw new Error("NEXT_PUBLIC_APP_URL environment variable is not defined.");
-     }
-     return `${this.appUrl}/auth/google/callback`;
-   },
+      console.error('Configuration Error: NEXT_PUBLIC_APP_URL is not set.');
+      throw new Error(
+        'NEXT_PUBLIC_APP_URL environment variable is not defined.'
+      );
+    }
+    return `${this.appUrl}/auth/google/callback`;
+  },
 
   /**
    * Checks if essential Google OAuth credentials are configured.
@@ -27,9 +29,11 @@ export const config = {
    */
   hasGoogleCredentials(): boolean {
     return !!this.googleClientId && !!this.googleClientSecret;
-  }
+  },
 };
 
 if (!config.hasGoogleCredentials()) {
-  console.warn("Configuration Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables are missing.");
+  console.warn(
+    'Configuration Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables are missing.'
+  );
 }

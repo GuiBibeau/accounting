@@ -2,7 +2,13 @@
 
 import React from 'react';
 import { VideoMetadata } from '@/lib/video';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 
 /** Props for the VideoGrid */
 type VideoGridProps = {
@@ -20,11 +26,19 @@ export function VideoGrid({ videos, isLoading, error }: VideoGridProps) {
   }
 
   if (error) {
-    return <div className="text-center p-4 text-red-600">Error loading videos: {error}</div>;
+    return (
+      <div className="text-center p-4 text-red-600">
+        Error loading videos: {error}
+      </div>
+    );
   }
 
   if (videos.length === 0) {
-    return <div className="text-center p-4 text-muted-foreground">You haven&apos;t uploaded any videos yet.</div>;
+    return (
+      <div className="text-center p-4 text-muted-foreground">
+        You haven&apos;t uploaded any videos yet.
+      </div>
+    );
   }
 
   return (
@@ -33,7 +47,9 @@ export function VideoGrid({ videos, isLoading, error }: VideoGridProps) {
         <Card key={video.id}>
           <CardHeader>
             <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center mb-2">
-              <span className="text-muted-foreground text-sm">No Thumbnail</span>
+              <span className="text-muted-foreground text-sm">
+                No Thumbnail
+              </span>
             </div>
             <CardTitle className="text-lg truncate" title={video.fileName}>
               {video.fileName}
@@ -43,7 +59,9 @@ export function VideoGrid({ videos, isLoading, error }: VideoGridProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">Status: {video.status.replace(/_/g, ' ')}</p>
+            <p className="text-sm text-muted-foreground">
+              Status: {video.status.replace(/_/g, ' ')}
+            </p>
           </CardContent>
         </Card>
       ))}

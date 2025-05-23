@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import Link from "next/link";
-import { useUser, useLogout } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Shadcn Avatar (Removed AvatarImage)
-import { Button, buttonVariants } from "@/components/ui/button"; // Shadcn Button
+import React from 'react';
+import Link from 'next/link';
+import { useUser, useLogout } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'; // Shadcn Avatar (Removed AvatarImage)
+import { Button, buttonVariants } from '@/components/ui/button'; // Shadcn Button
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"; // Shadcn DropdownMenu
+} from '@/components/ui/dropdown-menu'; // Shadcn DropdownMenu
 
 export default function AuthHeader() {
   const { user, loading } = useUser();
@@ -21,7 +21,7 @@ export default function AuthHeader() {
   const handleLogout = async () => {
     await logout();
     if (logoutError) {
-      console.error("Logout Error:", logoutError.message);
+      console.error('Logout Error:', logoutError.message);
     }
   };
 
@@ -49,53 +49,57 @@ export default function AuthHeader() {
           )}
 
           {/* User Dropdown or Login/Signup Links */}
-          {!loading && user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
+          {
+            !loading && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
+                    <Avatar className="h-8 w-8">
+                      {/* Optional: Add AvatarImage if user has profile picture URL */}
+                      {/* <AvatarImage src={user.photoURL || undefined} alt={user.email || 'User'} /> */}
+                      <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        Account
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {/* Add other items like Settings, Profile etc. if needed */}
+                  {/* <DropdownMenuItem>Profile</DropdownMenuItem> */}
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : !loading && !user ? (
+              <>
+                <Link
+                  href="/login"
+                  className={buttonVariants({ variant: 'ghost' })}
                 >
-                  <Avatar className="h-8 w-8">
-                    {/* Optional: Add AvatarImage if user has profile picture URL */}
-                    {/* <AvatarImage src={user.photoURL || undefined} alt={user.email || 'User'} /> */}
-                    <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Account</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {/* Add other items like Settings, Profile etc. if needed */}
-                {/* <DropdownMenuItem>Profile</DropdownMenuItem> */}
-                <DropdownMenuItem onClick={handleLogout}>
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : !loading && !user ? (
-            <>
-              <Link
-                href="/login"
-                className={buttonVariants({ variant: "ghost" })}
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className={buttonVariants({ variant: "default" })} // Or "ghost" or other variant
-              >
-                Sign Up
-              </Link>
-            </>
-          ) : null /* Handles the case where loading is false but user state is indeterminate */}
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className={buttonVariants({ variant: 'default' })} // Or "ghost" or other variant
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : null /* Handles the case where loading is false but user state is indeterminate */
+          }
         </div>
       </nav>
     </header>

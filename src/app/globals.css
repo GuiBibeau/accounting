@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @tailwind utilities;
 
@@ -149,7 +149,7 @@
 }
 
 .rainbow-border-container:focus-within::before {
-  content: "";
+  content: '';
   position: absolute;
   top: -2px;
   left: -2px;
@@ -175,6 +175,6 @@
   overflow: hidden;
 }
 
-.onboarding-dialog-content > button[data-slot="dialog-close"] {
+.onboarding-dialog-content > button[data-slot='dialog-close'] {
   display: none;
 }

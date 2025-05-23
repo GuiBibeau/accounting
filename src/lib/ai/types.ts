@@ -7,11 +7,9 @@ export interface AiProviderOptions {
   messages: AiProviderMessage[];
   model: string;
   stream?: boolean;
-
 }
 
 export interface AiProvider {
-
   generate(options: AiProviderOptions): Promise<Response>;
 }
 

@@ -10,7 +10,6 @@ export class GroqProvider implements AiProvider {
     this.apiKey = process.env.GROQ_API_KEY || '';
     if (!this.apiKey) {
       console.error('Groq API key not configured');
-
     }
   }
 
@@ -61,11 +60,9 @@ export class GroqProvider implements AiProvider {
       }
 
       if (!stream) {
-
         const data = await groqResponse.json();
         return NextResponse.json(data);
       }
-
 
       if (!groqResponse.body) {
         return NextResponse.json(
@@ -94,7 +91,6 @@ export class GroqProvider implements AiProvider {
         },
         cancel(reason) {
           console.log('Stream cancelled:', reason);
-
         },
       });
 

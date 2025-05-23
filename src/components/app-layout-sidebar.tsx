@@ -2,11 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import {
-  Code2,
-  History,
-  User,
-} from 'lucide-react';
+import { Code2, History, User } from 'lucide-react';
 import { useAuth, useLogout } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +29,9 @@ import {
  * @description Sidebar component specifically for the main application layout.
  * Integrates authentication context and provides navigation for chat history and YouTube connection.
  */
-export function AppLayoutSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppLayoutSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   const { user, isYouTubeConnected } = useAuth();
   const { logout } = useLogout();
 
@@ -42,7 +40,10 @@ export function AppLayoutSidebar({ ...props }: React.ComponentProps<typeof Sideb
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
               <Link href="/chat">
                 <Code2 className="!size-5 text-primary" />
                 <span className="text-base font-semibold">relation.dev</span>
@@ -75,7 +76,9 @@ export function AppLayoutSidebar({ ...props }: React.ComponentProps<typeof Sideb
               // Note: SidebarMenuButton expects a button/link structure,
               // so direct rendering might need wrapper or style adjustments.
               // For simplicity, placing it here. Consider wrapping if layout breaks.
-              <div className="px-3 py-1.5"> {/* Added padding for alignment */}
+              <div className="px-3 py-1.5">
+                {' '}
+                {/* Added padding for alignment */}
                 <ConnectYouTubeButton variant="full" />
               </div>
             )}
@@ -84,7 +87,6 @@ export function AppLayoutSidebar({ ...props }: React.ComponentProps<typeof Sideb
 
         {/* Spacer to push user section to bottom */}
         <div className="mt-auto" />
-
       </SidebarContent>
       <SidebarFooter>
         {/* User Account Section */}
@@ -104,7 +106,9 @@ export function AppLayoutSidebar({ ...props }: React.ComponentProps<typeof Sideb
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {user?.email && (
-                 <div className="text-sm text-muted-foreground">Logged in as: {user.email}</div>
+                <div className="text-sm text-muted-foreground">
+                  Logged in as: {user.email}
+                </div>
               )}
             </div>
             <Button variant="destructive" onClick={logout} className="w-full">

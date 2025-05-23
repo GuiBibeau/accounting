@@ -6,7 +6,6 @@ import {
 } from '@/lib/ai/types';
 import { getAiProvider, determineProviderFromModel } from '@/lib/ai/service';
 
-
 interface RequestBody {
   messages: AiProviderMessage[];
   model?: string;
@@ -19,7 +18,10 @@ export async function POST(req: NextRequest) {
   try {
     requestBody = await req.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Invalid request body' },
+      { status: 400 }
+    );
   }
 
   const {
@@ -39,7 +41,6 @@ export async function POST(req: NextRequest) {
   let providerId: AiProviderId;
 
   try {
-
     providerId = explicitProvider || determineProviderFromModel(model);
   } catch (error) {
     console.error('Error determining AI provider:', error);
@@ -59,18 +60,19 @@ export async function POST(req: NextRequest) {
       messages,
       model,
       stream,
-
     };
 
-
     const response = await aiProvider.generate(options);
-
 
     return response;
   } catch (error) {
     console.error(`Error calling ${providerId} provider:`, error);
 
-    const status = error instanceof Error && error.message.startsWith('Unsupported AI provider') ? 400 : 500;
+    const status =
+      error instanceof Error &&
+      error.message.startsWith('Unsupported AI provider')
+        ? 400
+        : 500;
     return NextResponse.json(
       {
         error: `Failed to get response from ${providerId} provider`,

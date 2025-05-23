@@ -5,7 +5,6 @@ import { decrypt, encrypt } from '@/lib/encryption';
 import * as admin from 'firebase-admin';
 import { GaxiosError } from 'gaxios';
 
-
 export type YouTubeCredentials = {
   encryptedAccessToken: string;
   encryptedRefreshToken?: string;
@@ -82,7 +81,7 @@ async function getYoutubeClient(userId: string): Promise<OAuth2Client> {
   const credentials = credsDoc.data() as YouTubeCredentials;
 
   if (!credentials.encryptedAccessToken) {
-      throw new Error(`Missing encryptedAccessToken for user ${userId}`);
+    throw new Error(`Missing encryptedAccessToken for user ${userId}`);
   }
 
   const accessToken = decrypt(credentials.encryptedAccessToken);
@@ -105,28 +104,33 @@ async function getYoutubeClient(userId: string): Promise<OAuth2Client> {
 
   oauthClient.on('tokens', async (tokens) => {
     const updateData: Partial<YouTubeCredentials> = {
-        updatedAt: new Date(),
-        expiryDate: tokens.expiry_date ?? null,
-        scopes: tokens.scope,
+      updatedAt: new Date(),
+      expiryDate: tokens.expiry_date ?? null,
+      scopes: tokens.scope,
     };
 
     if (tokens.access_token) {
-        updateData.encryptedAccessToken = encrypt(tokens.access_token);
+      updateData.encryptedAccessToken = encrypt(tokens.access_token);
     }
 
     if (tokens.refresh_token) {
       console.log('Received new refresh token for user:', userId);
       updateData.encryptedRefreshToken = encrypt(tokens.refresh_token);
     } else if (tokens.access_token) {
-       console.log('Refreshed access token for user:', userId);
+      console.log('Refreshed access token for user:', userId);
     }
 
     if (tokens.access_token || tokens.refresh_token) {
-        try {
-            await adminDb.doc(getCredentialsPath(userId)).set(updateData, { merge: true });
-        } catch (error) {
-            console.error(`Failed to update YouTube tokens in Firestore for user ${userId}:`, error);
-        }
+      try {
+        await adminDb
+          .doc(getCredentialsPath(userId))
+          .set(updateData, { merge: true });
+      } catch (error) {
+        console.error(
+          `Failed to update YouTube tokens in Firestore for user ${userId}:`,
+          error
+        );
+      }
     }
   });
 
@@ -138,13 +142,15 @@ async function getYoutubeApi(userId: string): Promise<youtube_v3.Youtube> {
   return google.youtube({ version: 'v3', auth });
 }
 
-export async function getChannelMetadata(userId: string): Promise<Omit<ChannelMetadata, 'userId' | 'lastSyncedAt'> | null> {
+export async function getChannelMetadata(
+  userId: string
+): Promise<Omit<ChannelMetadata, 'userId' | 'lastSyncedAt'> | null> {
   try {
     const youtube = await getYoutubeApi(userId);
     const response = await youtube.channels.list({
       part: ['snippet', 'contentDetails', 'statistics'],
       mine: true,
-      maxResults: 1
+      maxResults: 1,
     });
 
     if (!response.data.items || response.data.items.length === 0) {
@@ -154,8 +160,8 @@ export async function getChannelMetadata(userId: string): Promise<Omit<ChannelMe
 
     const channel = response.data.items[0];
     if (!channel.id) {
-        console.error(`Channel ID missing in API response for user ${userId}`);
-        return null;
+      console.error(`Channel ID missing in API response for user ${userId}`);
+      return null;
     }
 
     return {
@@ -174,66 +180,92 @@ export async function getChannelMetadata(userId: string): Promise<Omit<ChannelMe
   }
 }
 
-async function getAllVideosByChannelId(userId: string, channelId: string): Promise<Omit<VideoDetails, 'userId' | 'channelId'>[]> {
-    console.log(`Fetching videos for channel ${channelId} (user ${userId})`);
-    const youtube = await getYoutubeApi(userId);
-    const allVideos: Omit<VideoDetails, 'userId' | 'channelId'>[] = [];
-    let nextPageToken: string | undefined = undefined;
+async function getAllVideosByChannelId(
+  userId: string,
+  channelId: string
+): Promise<Omit<VideoDetails, 'userId' | 'channelId'>[]> {
+  console.log(`Fetching videos for channel ${channelId} (user ${userId})`);
+  const youtube = await getYoutubeApi(userId);
+  const allVideos: Omit<VideoDetails, 'userId' | 'channelId'>[] = [];
+  let nextPageToken: string | undefined = undefined;
 
-    try {
-        const videoIds: string[] = [];
-        do {
-            const searchResponse: youtube_v3.Schema$SearchListResponse = (await youtube.search.list({
-                part: ['id'], channelId: channelId, maxResults: 50, type: ['video'],
-                pageToken: nextPageToken, order: 'date',
-            })).data;
-            searchResponse.items?.forEach((item: youtube_v3.Schema$SearchResult) => { if (item.id?.videoId) videoIds.push(item.id.videoId); });
-            nextPageToken = searchResponse.nextPageToken ?? undefined;
-        } while (nextPageToken);
-        console.log(`Found ${videoIds.length} video IDs for channel ${channelId}`);
+  try {
+    const videoIds: string[] = [];
+    do {
+      const searchResponse: youtube_v3.Schema$SearchListResponse = (
+        await youtube.search.list({
+          part: ['id'],
+          channelId: channelId,
+          maxResults: 50,
+          type: ['video'],
+          pageToken: nextPageToken,
+          order: 'date',
+        })
+      ).data;
+      searchResponse.items?.forEach((item: youtube_v3.Schema$SearchResult) => {
+        if (item.id?.videoId) videoIds.push(item.id.videoId);
+      });
+      nextPageToken = searchResponse.nextPageToken ?? undefined;
+    } while (nextPageToken);
+    console.log(`Found ${videoIds.length} video IDs for channel ${channelId}`);
 
-        for (let i = 0; i < videoIds.length; i += 50) {
-            const batchIds = videoIds.slice(i, i + 50);
-            const videoResponse = await youtube.videos.list({
-                part: ['snippet', 'statistics', 'contentDetails'], id: batchIds, maxResults: 50,
-            });
-            videoResponse.data.items?.forEach(video => {
-                if (!video.id) return;
-                allVideos.push({
-                    id: video.id,
-                    title: video.snippet?.title ?? '',
-                    description: video.snippet?.description ?? '',
-                    publishedAt: video.snippet?.publishedAt ?? '',
-                    thumbnailUrl: video.snippet?.thumbnails?.default?.url ?? '',
-                    duration: video.contentDetails?.duration ?? undefined,
-                    viewCount: video.statistics?.viewCount ?? undefined,
-                    likeCount: video.statistics?.likeCount ?? undefined,
-                    commentCount: video.statistics?.commentCount ?? undefined,
-                });
-            });
-            console.log(`Fetched details for videos ${i+1} to ${Math.min(i+50, videoIds.length)} for channel ${channelId}`);
-        }
-        return allVideos;
-    } catch (error) {
-        console.error(`Error fetching videos for channel ${channelId} (user ${userId}):`, error);
-        throw error;
+    for (let i = 0; i < videoIds.length; i += 50) {
+      const batchIds = videoIds.slice(i, i + 50);
+      const videoResponse = await youtube.videos.list({
+        part: ['snippet', 'statistics', 'contentDetails'],
+        id: batchIds,
+        maxResults: 50,
+      });
+      videoResponse.data.items?.forEach((video) => {
+        if (!video.id) return;
+        allVideos.push({
+          id: video.id,
+          title: video.snippet?.title ?? '',
+          description: video.snippet?.description ?? '',
+          publishedAt: video.snippet?.publishedAt ?? '',
+          thumbnailUrl: video.snippet?.thumbnails?.default?.url ?? '',
+          duration: video.contentDetails?.duration ?? undefined,
+          viewCount: video.statistics?.viewCount ?? undefined,
+          likeCount: video.statistics?.likeCount ?? undefined,
+          commentCount: video.statistics?.commentCount ?? undefined,
+        });
+      });
+      console.log(
+        `Fetched details for videos ${i + 1} to ${Math.min(i + 50, videoIds.length)} for channel ${channelId}`
+      );
     }
+    return allVideos;
+  } catch (error) {
+    console.error(
+      `Error fetching videos for channel ${channelId} (user ${userId}):`,
+      error
+    );
+    throw error;
+  }
 }
 
-export async function getVideoComments(userId: string, videoId: string): Promise<Omit<CommentDetails, 'userId' | 'channelId' | 'videoId'>[]> {
+export async function getVideoComments(
+  userId: string,
+  videoId: string
+): Promise<Omit<CommentDetails, 'userId' | 'channelId' | 'videoId'>[]> {
   const youtube = await getYoutubeApi(userId);
-  const allComments: Omit<CommentDetails, 'userId' | 'channelId' | 'videoId'>[] = [];
+  const allComments: Omit<
+    CommentDetails,
+    'userId' | 'channelId' | 'videoId'
+  >[] = [];
   let nextPageToken: string | undefined = undefined;
 
   try {
     do {
-      const response: youtube_v3.Schema$CommentThreadListResponse = (await youtube.commentThreads.list({
-        part: ['snippet', 'replies'],
-        videoId: videoId,
-        maxResults: 100,
-        pageToken: nextPageToken,
-        textFormat: 'plainText',
-      })).data;
+      const response: youtube_v3.Schema$CommentThreadListResponse = (
+        await youtube.commentThreads.list({
+          part: ['snippet', 'replies'],
+          videoId: videoId,
+          maxResults: 100,
+          pageToken: nextPageToken,
+          textFormat: 'plainText',
+        })
+      ).data;
 
       response.items?.forEach((thread: youtube_v3.Schema$CommentThread) => {
         const topLevelComment = thread.snippet?.topLevelComment;
@@ -242,7 +274,8 @@ export async function getVideoComments(userId: string, videoId: string): Promise
             id: topLevelComment.id,
             text: topLevelComment.snippet.textDisplay ?? '',
             authorDisplayName: topLevelComment.snippet.authorDisplayName ?? '',
-            authorProfileImageUrl: topLevelComment.snippet.authorProfileImageUrl ?? undefined,
+            authorProfileImageUrl:
+              topLevelComment.snippet.authorProfileImageUrl ?? undefined,
             publishedAt: topLevelComment.snippet.publishedAt ?? '',
             updatedAt: topLevelComment.snippet.updatedAt ?? undefined,
             likeCount: topLevelComment.snippet.likeCount ?? 0,
@@ -255,119 +288,158 @@ export async function getVideoComments(userId: string, videoId: string): Promise
       nextPageToken = response.nextPageToken ?? undefined;
     } while (nextPageToken);
 
-    console.log(`Fetched ${allComments.length} top-level comment threads for video ${videoId}`);
+    console.log(
+      `Fetched ${allComments.length} top-level comment threads for video ${videoId}`
+    );
     return allComments;
   } catch (error) {
-     const gaxiosError = error as GaxiosError;
-     if (gaxiosError.response?.data?.error?.errors?.[0]?.reason === 'commentsDisabled') {
-        console.warn(`Comments are disabled for video ${videoId}`);
-        return [];
-     }
-     console.error(`Error fetching comments for video ${videoId} (user ${userId}):`, error);
-     throw error;
-  }
-}
-
-export async function saveChannelData(userId: string, data: Omit<ChannelMetadata, 'userId' | 'lastSyncedAt'>): Promise<void> {
-  if (!data.id) {
-      console.error("Cannot save channel data without a channel ID.");
-      throw new Error("Channel ID is missing in data to be saved.");
-  }
-  const channelId = data.id;
-  const metadataPath = getChannelMetadataPath(channelId);
-  const channelDataToSave: ChannelMetadata = {
-      ...data,
-      userId: userId,
-      lastSyncedAt: new Date()
-  };
-
-  try {
-    await adminDb.doc(metadataPath).set(channelDataToSave, { merge: true });
-    console.log(`Saved channel metadata for channel ${channelId} (user ${userId})`);
-  } catch (error) {
-    console.error(`Error saving channel metadata for channel ${channelId} (user ${userId}):`, error);
+    const gaxiosError = error as GaxiosError;
+    if (
+      gaxiosError.response?.data?.error?.errors?.[0]?.reason ===
+      'commentsDisabled'
+    ) {
+      console.warn(`Comments are disabled for video ${videoId}`);
+      return [];
+    }
+    console.error(
+      `Error fetching comments for video ${videoId} (user ${userId}):`,
+      error
+    );
     throw error;
   }
 }
 
-export async function saveVideoData(userId: string, channelId: string, videos: Omit<VideoDetails, 'userId' | 'channelId'>[]): Promise<void> {
+export async function saveChannelData(
+  userId: string,
+  data: Omit<ChannelMetadata, 'userId' | 'lastSyncedAt'>
+): Promise<void> {
+  if (!data.id) {
+    console.error('Cannot save channel data without a channel ID.');
+    throw new Error('Channel ID is missing in data to be saved.');
+  }
+  const channelId = data.id;
+  const metadataPath = getChannelMetadataPath(channelId);
+  const channelDataToSave: ChannelMetadata = {
+    ...data,
+    userId: userId,
+    lastSyncedAt: new Date(),
+  };
+
+  try {
+    await adminDb.doc(metadataPath).set(channelDataToSave, { merge: true });
+    console.log(
+      `Saved channel metadata for channel ${channelId} (user ${userId})`
+    );
+  } catch (error) {
+    console.error(
+      `Error saving channel metadata for channel ${channelId} (user ${userId}):`,
+      error
+    );
+    throw error;
+  }
+}
+
+export async function saveVideoData(
+  userId: string,
+  channelId: string,
+  videos: Omit<VideoDetails, 'userId' | 'channelId'>[]
+): Promise<void> {
   if (videos.length === 0) return;
 
   const batch = adminDb.batch();
-  const videoCollectionRef = adminDb.collection(getVideoCollectionPath(channelId));
+  const videoCollectionRef = adminDb.collection(
+    getVideoCollectionPath(channelId)
+  );
 
-  videos.forEach(video => {
+  videos.forEach((video) => {
     if (!video.id) {
-        console.warn("Skipping video save due to missing ID:", video);
-        return;
+      console.warn('Skipping video save due to missing ID:', video);
+      return;
     }
     const videoRef = videoCollectionRef.doc(video.id);
     const videoDataToSave: VideoDetails = {
-        ...video,
-        userId: userId,
-        channelId: channelId
+      ...video,
+      userId: userId,
+      channelId: channelId,
     };
     batch.set(videoRef, videoDataToSave, { merge: true });
   });
 
   try {
     await batch.commit();
-    console.log(`Saved ${videos.length} videos for channel ${channelId} (user ${userId})`);
+    console.log(
+      `Saved ${videos.length} videos for channel ${channelId} (user ${userId})`
+    );
   } catch (error) {
-    console.error(`Error saving video data for channel ${channelId} (user ${userId}):`, error);
+    console.error(
+      `Error saving video data for channel ${channelId} (user ${userId}):`,
+      error
+    );
     throw error;
   }
 }
 
-export async function saveCommentData(userId: string, channelId: string, videoId: string, comments: Omit<CommentDetails, 'userId' | 'channelId' | 'videoId'>[]): Promise<void> {
-   if (comments.length === 0) return;
+export async function saveCommentData(
+  userId: string,
+  channelId: string,
+  videoId: string,
+  comments: Omit<CommentDetails, 'userId' | 'channelId' | 'videoId'>[]
+): Promise<void> {
+  if (comments.length === 0) return;
 
-   const batch = adminDb.batch();
-   const commentCollectionRef = adminDb.collection(getCommentCollectionPath(channelId, videoId));
+  const batch = adminDb.batch();
+  const commentCollectionRef = adminDb.collection(
+    getCommentCollectionPath(channelId, videoId)
+  );
 
-   comments.forEach(comment => {
-     if (!comment.id) {
-         console.warn("Skipping comment save due to missing ID:", comment);
-         return;
-     }
-     const commentRef = commentCollectionRef.doc(comment.id);
+  comments.forEach((comment) => {
+    if (!comment.id) {
+      console.warn('Skipping comment save due to missing ID:', comment);
+      return;
+    }
+    const commentRef = commentCollectionRef.doc(comment.id);
 
-     // Build the data object explicitly, adding optional fields only if defined
-     const commentDataToSave: Partial<CommentDetails> = {
-        // Required fields
-        id: comment.id,
-        userId: userId,
-        channelId: channelId,
-        videoId: videoId,
-        text: comment.text,
-        authorDisplayName: comment.authorDisplayName,
-        publishedAt: comment.publishedAt,
-        likeCount: comment.likeCount,
-     };
+    // Build the data object explicitly, adding optional fields only if defined
+    const commentDataToSave: Partial<CommentDetails> = {
+      // Required fields
+      id: comment.id,
+      userId: userId,
+      channelId: channelId,
+      videoId: videoId,
+      text: comment.text,
+      authorDisplayName: comment.authorDisplayName,
+      publishedAt: comment.publishedAt,
+      likeCount: comment.likeCount,
+    };
 
-     if (comment.authorProfileImageUrl !== undefined) {
-        commentDataToSave.authorProfileImageUrl = comment.authorProfileImageUrl;
-     }
-     if (comment.updatedAt !== undefined) {
-        commentDataToSave.updatedAt = comment.updatedAt;
-     }
-     if (comment.totalReplyCount !== undefined) {
-        commentDataToSave.totalReplyCount = comment.totalReplyCount;
-     }
-     if (comment.parentId !== undefined) {
-        commentDataToSave.parentId = comment.parentId;
-     }
+    if (comment.authorProfileImageUrl !== undefined) {
+      commentDataToSave.authorProfileImageUrl = comment.authorProfileImageUrl;
+    }
+    if (comment.updatedAt !== undefined) {
+      commentDataToSave.updatedAt = comment.updatedAt;
+    }
+    if (comment.totalReplyCount !== undefined) {
+      commentDataToSave.totalReplyCount = comment.totalReplyCount;
+    }
+    if (comment.parentId !== undefined) {
+      commentDataToSave.parentId = comment.parentId;
+    }
 
-     batch.set(commentRef, commentDataToSave, { merge: true });
-   });
+    batch.set(commentRef, commentDataToSave, { merge: true });
+  });
 
-   try {
-     await batch.commit();
-     console.log(`Saved ${comments.length} comments for video ${videoId}, channel ${channelId} (user ${userId})`);
-   } catch (error) {
-     console.error(`Error saving comment data for video ${videoId}, channel ${channelId} (user ${userId}):`, error);
-     throw error;
-   }
+  try {
+    await batch.commit();
+    console.log(
+      `Saved ${comments.length} comments for video ${videoId}, channel ${channelId} (user ${userId})`
+    );
+  } catch (error) {
+    console.error(
+      `Error saving comment data for video ${videoId}, channel ${channelId} (user ${userId}):`,
+      error
+    );
+    throw error;
+  }
 }
 
 export async function syncYoutubeData(userId: string): Promise<void> {
@@ -387,34 +459,45 @@ export async function syncYoutubeData(userId: string): Promise<void> {
       let totalCommentsSaved = 0;
       for (const video of videos) {
         if (!video.id) {
-            console.warn(`Skipping comments for video with missing ID (channel ${channelId})`);
-            continue;
+          console.warn(
+            `Skipping comments for video with missing ID (channel ${channelId})`
+          );
+          continue;
         }
         try {
-            if (video.commentCount && parseInt(video.commentCount, 10) > 0) {
-                const comments = await getVideoComments(userId, video.id);
-                if (comments.length > 0) {
-                    await saveCommentData(userId, channelId, video.id, comments);
-                    totalCommentsSaved += comments.length;
-                }
+          if (video.commentCount && parseInt(video.commentCount, 10) > 0) {
+            const comments = await getVideoComments(userId, video.id);
+            if (comments.length > 0) {
+              await saveCommentData(userId, channelId, video.id, comments);
+              totalCommentsSaved += comments.length;
             }
+          }
         } catch (commentError) {
-            console.error(`Failed to sync comments for video ${video.id} (channel ${channelId}, user ${userId}):`, commentError);
+          console.error(
+            `Failed to sync comments for video ${video.id} (channel ${channelId}, user ${userId}):`,
+            commentError
+          );
         }
       }
-      console.log(`Saved a total of ${totalCommentsSaved} top-level comments across all videos for channel ${channelId} (user ${userId}).`);
+      console.log(
+        `Saved a total of ${totalCommentsSaved} top-level comments across all videos for channel ${channelId} (user ${userId}).`
+      );
 
       try {
-          await adminDb.doc(getChannelMetadataPath(channelId)).update({
-              lastSyncedAt: new Date()
-          });
-          console.log(`Updated lastSyncedAt for channel ${channelId}`);
+        await adminDb.doc(getChannelMetadataPath(channelId)).update({
+          lastSyncedAt: new Date(),
+        });
+        console.log(`Updated lastSyncedAt for channel ${channelId}`);
       } catch (updateError) {
-          console.error(`Failed to update lastSyncedAt for channel ${channelId}:`, updateError);
+        console.error(
+          `Failed to update lastSyncedAt for channel ${channelId}:`,
+          updateError
+        );
       }
-
     } else {
-        console.warn(`Cannot sync data as channel ID could not be determined for user ${userId}`);
+      console.warn(
+        `Cannot sync data as channel ID could not be determined for user ${userId}`
+      );
     }
     console.log(`YouTube data sync completed for user ${userId}.`);
   } catch (error) {

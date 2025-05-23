@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
-import {
-  AiProvider,
-  AiProviderOptions,
-  AiProviderMessage,
-} from '../types';
-
+import { AiProvider, AiProviderOptions, AiProviderMessage } from '../types';
 
 const GEMINI_API_BASE_URL =
   'https://generativelanguage.googleapis.com/v1beta/models';
-
 
 interface GeminiMessagePart {
   text: string;
@@ -19,16 +13,15 @@ interface GeminiMessageContent {
   parts: GeminiMessagePart[];
 }
 
-
-function mapMessagesToGeminiFormat(messages: AiProviderMessage[]): GeminiMessageContent[] {
-
+function mapMessagesToGeminiFormat(
+  messages: AiProviderMessage[]
+): GeminiMessageContent[] {
   return messages
     .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
     .map((msg) => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.content }],
     }));
-
 }
 
 export class GeminiProvider implements AiProvider {
@@ -69,8 +62,6 @@ export class GeminiProvider implements AiProvider {
         },
         body: JSON.stringify({
           contents: geminiMessages,
-
-
         }),
 
         // @ts-expect-error - duplex is not in standard fetch types yet
@@ -95,15 +86,12 @@ export class GeminiProvider implements AiProvider {
         return NextResponse.json(data);
       }
 
-
       if (!geminiResponse.body) {
         return NextResponse.json(
           { error: 'Gemini API response body is null for stream' },
           { status: 500 }
         );
       }
-
-
 
       const responseStream = new ReadableStream({
         async start(controller) {
@@ -115,21 +103,17 @@ export class GeminiProvider implements AiProvider {
             while (true) {
               const { done, value } = await reader.read();
               if (done) {
-
                 break;
               }
               buffer += decoder.decode(value, { stream: true });
-
 
               const lines = buffer.split('\n');
               buffer = lines.pop() || '';
 
               for (const line of lines) {
-                 if (line.trim()) {
-
-
-                    controller.enqueue(new TextEncoder().encode(line + '\n'));
-                 }
+                if (line.trim()) {
+                  controller.enqueue(new TextEncoder().encode(line + '\n'));
+                }
               }
             }
           } catch (error) {
@@ -143,7 +127,6 @@ export class GeminiProvider implements AiProvider {
           console.log('Gemini Stream cancelled:', reason);
         },
       });
-
 
       return new NextResponse(responseStream, {
         headers: {

@@ -5,9 +5,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
-  signInWithPopup
-} from "firebase/auth";
-import { auth } from "./firebase";
+  signInWithPopup,
+} from 'firebase/auth';
+import { auth } from './firebase';
 
 export interface AuthError {
   code: string;
@@ -25,7 +25,10 @@ export class AuthService {
     this.auth = auth;
   }
 
-  async signUpWithEmail(email: string, password: string): Promise<UserCredential> {
+  async signUpWithEmail(
+    email: string,
+    password: string
+  ): Promise<UserCredential> {
     try {
       return await createUserWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
@@ -33,7 +36,10 @@ export class AuthService {
     }
   }
 
-  async signInWithEmail(email: string, password: string): Promise<UserCredential> {
+  async signInWithEmail(
+    email: string,
+    password: string
+  ): Promise<UserCredential> {
     try {
       return await signInWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
@@ -63,12 +69,12 @@ export class AuthService {
       const firebaseError = error as FirebaseError;
       return {
         code: firebaseError.code || 'auth/unknown-error',
-        message: error.message || 'An unknown authentication error occurred'
+        message: error.message || 'An unknown authentication error occurred',
       };
     }
     return {
       code: 'auth/unknown-error',
-      message: 'An unknown authentication error occurred'
+      message: 'An unknown authentication error occurred',
     };
   }
 }
