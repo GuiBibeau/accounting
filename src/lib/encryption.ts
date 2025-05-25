@@ -7,19 +7,19 @@ const IV_LENGTH = 16;
 /** Authentication tag length (16 bytes) */
 const AUTH_TAG_LENGTH = 16;
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+const encryptionKeyString = process.env.ENCRYPTION_KEY;
 
-if (
-  !ENCRYPTION_KEY ||
-  ENCRYPTION_KEY.length !== 64 ||
-  !/^[0-9a-fA-F]+$/.test(ENCRYPTION_KEY)
-) {
+if (!encryptionKeyString) {
+  throw new Error('ENCRYPTION_KEY is not defined in environment variables.');
+}
+
+if (encryptionKeyString.length !== 32) {
   throw new Error(
-    'ENCRYPTION_KEY environment variable is missing, not 64 characters long, or not a valid hex string.'
+    `ENCRYPTION_KEY must be 32 characters long. Current length: ${encryptionKeyString.length}`
   );
 }
 
-const key = Buffer.from(ENCRYPTION_KEY, 'hex');
+const key = Buffer.from(encryptionKeyString, 'utf-8');
 
 /**
  * Encrypts text using AES-256-GCM.
