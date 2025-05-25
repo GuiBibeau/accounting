@@ -9,17 +9,27 @@ const AUTH_TAG_LENGTH = 16;
 
 const encryptionKeyString = process.env.ENCRYPTION_KEY;
 
-if (!encryptionKeyString) {
-  throw new Error('ENCRYPTION_KEY is not defined in environment variables.');
-}
-
-if (encryptionKeyString.length !== 32) {
+if (typeof encryptionKeyString !== 'string' || !encryptionKeyString) {
   throw new Error(
-    `ENCRYPTION_KEY must be 32 characters long. Current length: ${encryptionKeyString.length}`
+    'ENCRYPTION_KEY is not defined in environment variables or is empty.'
   );
 }
 
-const key = Buffer.from(encryptionKeyString, 'utf-8');
+if (encryptionKeyString.length !== 64) {
+  throw new Error(
+    `ENCRYPTION_KEY must be a 64-character hexadecimal string. Current length: ${encryptionKeyString.length}`
+  );
+}
+
+const key = Buffer.from(encryptionKeyString, 'hex');
+
+if (key.length !== 32) {
+  // This should not happen if the input is a 64-char hex string,
+  // but it's a crucial validation for the crypto library.
+  throw new Error(
+    `Failed to derive a 32-byte key from the 64-character hex ENCRYPTION_KEY. Derived key length: ${key.length} bytes.`
+  );
+}
 
 /**
  * Encrypts text using AES-256-GCM.
